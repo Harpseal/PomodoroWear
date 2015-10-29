@@ -60,7 +60,6 @@ import com.google.android.gms.wearable.Wearable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -209,7 +208,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
         float mHandWidthMeterHour;
         boolean mAmbient;
         //Time mTime;
-        private long mClockShift = 0;
+
         private long mClockBase = 0;
         private String mClockWeek = "";
         private String mClockDay = "";
@@ -345,36 +344,48 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mHandPaintHour.setAntiAlias(true);
             mHandPaintHour.setStrokeCap(Paint.Cap.ROUND);
 
+            mTimeZone = TimeZone.getDefault();
             updateClock(mTimeZone);
+            mBatteryPredictionStartTime = System.currentTimeMillis();
             //mTime = new Time();
         }
 
         private void updateClock(TimeZone timeZone)
         {
 
+            if (mTimeZone!=null)
+            {
+                int timezoneOffset = mTimeZone.getRawOffset() - timeZone.getRawOffset();
+                if (timezoneOffset!=0) {
+                    if (mDataTimerDateStart != 0)
+                        mDataTimerDateStart += timezoneOffset;
+                    if (mDataTimerDateEnd != 0)
+                        mDataTimerDateEnd += timezoneOffset;
+
+                    if (mDataTomatoDateStart != 0)
+                        mDataTomatoDateStart += timezoneOffset;
+                    if (mDataTomatoDateEnd != 0)
+                        mDataTomatoDateEnd += timezoneOffset;
+
+                    if (mBatteryPredictionStartTime != 0)
+                        mBatteryPredictionStartTime += timezoneOffset;
+                }
+            }
+            mTimeZone = timeZone;
+
             Calendar cal = Calendar.getInstance(Locale.getDefault());
             cal.setTimeInMillis(System.currentTimeMillis());
+
+            mClockDay = DateFormat.format("dd", cal).toString();
+            mClockWeek = DateFormat.format("EE", cal).toString();
+
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
             mClockBase = cal.getTimeInMillis();
-            if (timeZone == null)
-                mClockShift = 0;
-            else
-            {
-                cal.setTimeZone(timeZone);
-                cal.set(Calendar.HOUR_OF_DAY, 0);
-                cal.set(Calendar.MINUTE, 0);
-                cal.set(Calendar.SECOND, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                mClockShift = cal.getTimeInMillis()-mClockBase;
-            }
-
-            mClockDay = DateFormat.format("dd", cal).toString();
-            mClockWeek = DateFormat.format("EE", cal).toString();
+            mUpdateFlag |= DRAW_HOUR;
         }
-
 
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
@@ -606,8 +617,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
                                     isModifiedConfig= true;
                                     //Log.d(TAG,"Reset");
                                 }
-                                else
-                                    ;//Log.d(TAG,"Cancel");
+                                //else
+                                //    ;//Log.d(TAG,"Cancel");
 
 
                             }
@@ -776,7 +787,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             {
                 if ((drawFlag & DRAW_HOUR)!=0) {
                     mHandPaintMeter.setColor(Color.GRAY);
-                    canvas.drawCircle(centerX, centerY, (float) mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
+                    canvas.drawCircle(centerX, centerY, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
                     //canvas.drawLine(centerX, centerY, centerX, centerY - meterLenMin, mHandPaintMeter);
                 }
             }
@@ -833,7 +844,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     canvas.drawLine(
                             centerX, centerY,
                             centerX + meterX, centerY + meterY, mHandPaintMeter);
-                    canvas.drawCircle(centerX, centerY, (float) mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
+                    canvas.drawCircle(centerX, centerY, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
                 }
 
                 if ((drawFlag & DRAW_SEC)!=0 && !mAmbient) {
@@ -867,12 +878,19 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mTouchHeight = height;
             //Resources resources = MainWatchFace.this.getResources();
 
+//            Log.d(TAG,"TimeZone (Default) getRawOffset " + TimeZone.getDefault().getRawOffset() + " " + TimeZone.getDefault().getDisplayName());
+//            if (mTimeZone != null)
+//                Log.d(TAG,"TimeZone ( Input ) getRawOffset " + mTimeZone.getRawOffset() + " " + mTimeZone.getDisplayName());
+//            else
+//                Log.d(TAG,"TimeZone ( Input ) getRawOffset null....");
+
 
             int hours,minutes,seconds;
-            if (System.currentTimeMillis() - mClockBase > 24*60*60*1000)
+
+            seconds = (int)((System.currentTimeMillis() - mClockBase)/1000);
+            if (seconds> 24*60*60)
                 updateClock(mTimeZone);
 
-            seconds = (int)((System.currentTimeMillis() - mClockBase + mClockShift)/1000);
             minutes = seconds/60;
             seconds %= 60;
             hours = minutes/60;
@@ -1370,12 +1388,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
     private void updateCountDown()
         {
+            final int hourLengthInMS = 60*60*1000;
             //Log.d(TAG,"updateCountDown");
             long curMs = System.currentTimeMillis();
             long mTimerMSPre = mTimerMS;
             mTimerMS = mDataTimerDateEnd == 0?Long.MAX_VALUE: mDataTimerDateEnd - curMs;
             long mTomatoMSPre = mTomatoMS;
             mTomatoMS = mDataTomatoDateEnd == 0?Long.MAX_VALUE: mDataTomatoDateEnd - curMs;
+
+            if ((mDataTimerDateEnd!= 0 && mTimerMSPre/hourLengthInMS != mTimerMS/hourLengthInMS) ||
+                (mDataTomatoDateEnd!= 0 && mTomatoMSPre/hourLengthInMS != mTomatoMS/hourLengthInMS))
+                mUpdateFlag|=DRAW_HOUR;
 
             //Log.d(TAG,"Update timer....");
             if (mDataTomatoDateEnd!= 0 && mTomatoMSPre>0 && mTomatoMS<=0 && mTomatoMSPre != Long.MAX_VALUE)
@@ -1504,35 +1527,35 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
         private void addIntKeyIfMissingInt(DataMap config, String key, int sec) {
             if (!config.containsKey(key)) {
-                Log.d(TAG, "addIntKeyIfMissing  key: " + key + "  sec: " + sec);
+                //Log.d(TAG, "addIntKeyIfMissing  key: " + key + "  sec: " + sec);
                 config.putInt(key, sec);
             }
         }
 
         private void addIntKeyIfMissingLong(DataMap config, String key, long value) {
             if (!config.containsKey(key)) {
-                Log.d(TAG,"addIntKeyIfMissing  key: " + key + "  value: " + value);
+                //Log.d(TAG,"addIntKeyIfMissing  key: " + key + "  value: " + value);
                 config.putLong(key, value);
             }
         }
 
         private void addIntKeyIfMissingString(DataMap config, String key, String str) {
             if (!config.containsKey(key)) {
-                Log.d(TAG,"addIntKeyIfMissing  key: " + key + "  str: " + str);
+                //Log.d(TAG,"addIntKeyIfMissing  key: " + key + "  str: " + str);
                 config.putString(key, str);
             }
         }
 
         private void addIntKeyIfMissingStringArray(DataMap config, String key, String[] array) {
             if (!config.containsKey(key)) {
-                Log.d(TAG,"addIntKeyIfMissing  key: " + key + "  str: " + array);
+                //Log.d(TAG,"addIntKeyIfMissing  key: " + key);
                 config.putStringArray(key, array);
             }
         }
 
         private void addIntKeyIfMissingDataMapArray(DataMap config, String key, ArrayList<DataMap> array) {
             if (!config.containsKey(key)) {
-                Log.d(TAG, "addIntKeyIfMissing  key: " + key);
+                //Log.d(TAG, "addIntKeyIfMissing  key: " + key);
                 if (array == null)
                     array = new ArrayList<DataMap>();
                 config.putDataMapArrayList(key, array);
@@ -1563,42 +1586,39 @@ public class MainWatchFace extends CanvasWatchFaceService {
         }
 
         private void updateUiForConfigDataMap(final DataMap config) {
-            boolean uiUpdated = false;
             for (String configKey : config.keySet()) {
                 if (!config.containsKey(configKey)) {
                     continue;
                 }
 
-                int newTime = -1;
-
                 if (configKey.equals(WatchFaceUtil.KEY_TIMER1)) {
-                    newTime = mDataTimer1 = config.getInt(configKey);uiUpdated = true;
+                    mDataTimer1 = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER2)) {
-                    newTime =  mDataTimer2 = config.getInt(configKey);uiUpdated = true;
+                    mDataTimer2 = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER3)) {
-                    newTime = mDataTimer3 = config.getInt(configKey);uiUpdated = true;
+                    mDataTimer3 = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER4)) {
-                    newTime = mDataTimer4 = config.getInt(configKey);uiUpdated = true;
+                    mDataTimer4 = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER_DATE_START)) {
-                    mDataTimerDateStart = config.getLong(configKey);uiUpdated = true;
+                    mDataTimerDateStart = config.getLong(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER_DATE_END)) {
-                    mDataTimerDateEnd = config.getLong(configKey);uiUpdated = true;
+                    mDataTimerDateEnd = config.getLong(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_WORK)) {
-                    newTime =  mDataTomatoWork = config.getInt(configKey);uiUpdated = true;
+                    mDataTomatoWork = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_RELAX)) {
-                    newTime =  mDataTomatoRelax = config.getInt(configKey);uiUpdated = true;
+                    mDataTomatoRelax = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_RELAX_LONG)) {
-                    newTime = mDataTomatoRelaxLong = config.getInt(configKey);uiUpdated = true;
+                    mDataTomatoRelaxLong = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_CALENDAR_ID)) {
-                    mCalendarID = config.getLong(configKey);uiUpdated = true;
+                    mCalendarID = config.getLong(configKey);
                     //Log.d(TAG, "updateUiForConfigDataMap configKey:" + configKey + " mCalendarID: " + mCalendarID);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_CALENDAR_COLOR)) {
-                    mCalendarColor = config.getInt(configKey);uiUpdated = true;
+                    mCalendarColor = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME)) {
-                    mCalendarName = config.getString(configKey);uiUpdated = true;
+                    mCalendarName = config.getString(configKey);
                     //Log.d(TAG, "updateUiForConfigDataMap configKey:" + configKey + " mCalendarName: " + mCalendarName);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TAGS)) {
-                    mTomatoTags = config.getStringArray(configKey);uiUpdated = true;
+                    mTomatoTags = config.getStringArray(configKey);
                     //Log.d(TAG, "updateUiForConfigDataMap configKey:" + configKey + " mTomatoTags: ");
                     for (String tag : mTomatoTags)
                     {
@@ -1607,7 +1627,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                 }else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE)) {
                     mTomatoEventQueue = config.getDataMapArrayList(configKey);
-                    uiUpdated = true;
                     for (DataMap map : mTomatoEventQueue)
                     {
                         Log.d(TAG,map.toString());
@@ -1616,7 +1635,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                     if (mTomatoEventQueue.size() != 0)
                     {
-                        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
                         DataMap eventMsgMap = new DataMap();
                         eventMsgMap.putLong(WatchFaceUtil.MSG_ID_KEY, System.currentTimeMillis());
                         eventMsgMap.putString(WatchFaceUtil.MSG_SENDER_KEY, WatchFaceUtil.MSG_SENDER_WATCH_FACE);
@@ -1626,16 +1644,16 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         new SendActivityPhoneMessage(eventMsgMap).start();
                     }
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TYPE)) {
-                    mTomatoType = config.getString(configKey);uiUpdated = true;
+                    mTomatoType = config.getString(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_DATE_START)) {
-                    mDataTomatoDateStart = config.getLong(configKey);uiUpdated = true;
+                    mDataTomatoDateStart = config.getLong(configKey);
 //                    Long dateInMillis = config.getLong(configKey);uiUpdated = true;
 //                    Calendar cal = Calendar.getInstance();
 //                    cal.setTimeInMillis(dateInMillis);
 //                    mTomatoDate = cal.getTime();
                     uiUpdated = true;
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_DATE_END)) {
-                    mDataTomatoDateEnd = config.getLong(configKey);uiUpdated = true;
+                    mDataTomatoDateEnd = config.getLong(configKey);
                 } else {
                     Log.w(TAG, "Ignoring unknown config key: " + configKey);
                 }
