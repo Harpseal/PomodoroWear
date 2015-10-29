@@ -1651,7 +1651,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
 //                    Calendar cal = Calendar.getInstance();
 //                    cal.setTimeInMillis(dateInMillis);
 //                    mTomatoDate = cal.getTime();
-                    uiUpdated = true;
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_DATE_END)) {
                     mDataTomatoDateEnd = config.getLong(configKey);
                 } else {
