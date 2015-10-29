@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">PomodoroWear</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="title_no_device_connected">No wearable device is currently connected.</string>
+    <string name="ok_no_device_connected">OK</string>
+</resources>

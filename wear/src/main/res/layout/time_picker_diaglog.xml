@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_box="all">
+
+        <TextView
+            android:id="@+id/time_picker_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Time Picker"
+            android:layout_marginBottom="20dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <android.support.wearable.view.CircledImageView
+                android:id="@+id/time_picker_sub_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:src="@drawable/icon_minus_math_100"
+
+                app:circle_color="@color/semitransparent_grey"
+                app:circle_radius="25dp"
+                app:circle_radius_pressed="20dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal|center_vertical"
+                android:layout_marginRight="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true">
+            <TextView
+                android:id="@+id/time_picker_time_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="30"
+                android:textSize="40dp"/>
+                <TextView
+                    android:id="@+id/time_picker_min_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:text="min" />
+            </LinearLayout>
+
+
+            <android.support.wearable.view.CircledImageView
+                android:id="@+id/time_picker_add_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:src="@drawable/icon_plus_math_100"
+                app:circle_color="@color/semitransparent_grey"
+                app:circle_radius="25dp"
+                app:circle_radius_pressed="20dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true" />
+
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <android.support.wearable.view.CircledImageView
+                android:id="@+id/time_picker_cancel_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|bottom"
+                android:src="@drawable/icon_delete_100"
+                android:layout_marginRight="25dp"
+                app:circle_color="@color/red"
+                app:circle_radius="25dp"
+                app:circle_radius_pressed="20dp"/>
+
+            <android.support.wearable.view.CircledImageView
+                android:id="@+id/time_picker_ok_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:src="@drawable/icon_checked_100"
+                app:circle_color="@color/green"
+                app:circle_radius="25dp"
+                app:circle_radius_pressed="20dp"/>
+w
+        </LinearLayout>
+
+    </LinearLayout>
+</android.support.wearable.view.BoxInsetLayout>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tomato_builder_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/config_activity_background">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    <TextView
+        android:id="@+id/tomato_builder_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="14dp"
+        android:textSize="24sp"
+        android:textColor="@color/config_activity_header_text_color"
+        android:text="@string/tomato_builder_title"
+        android:fontFamily="sans-serif-condensed-light"
+        app:layout_box="left|top"/>
+
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tomato_builder_tag_list"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/tomato_builder_header"
+            android:layout_alignStart="@+id/tomato_builder_header" />
+
+        <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_below="@+id/tomato_builder_header"
+        android:layout_alignParentEnd="true">
+
+        <android.support.wearable.view.CircledImageView
+            android:id="@+id/tomato_builder_btn_mic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:src="@drawable/icon_mic_100"
+            android:layout_marginBottom="25dp"
+            app:circle_color="@color/blue"
+            app:circle_radius="25dp"
+            app:circle_radius_pressed="20dp"/>
+
+        <android.support.wearable.view.CircledImageView
+            android:id="@+id/tomato_builder_btn_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:src="@drawable/icon_checked_100"
+            app:circle_color="@color/green"
+            app:circle_radius="25dp"
+            app:circle_radius_pressed="20dp"/>
+
+    </LinearLayout>
+
+    </RelativeLayout>
+</android.support.wearable.view.BoxInsetLayout>

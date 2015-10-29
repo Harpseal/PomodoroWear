@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tomato_builder_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/config_activity_background">
+
+    <TextView
+        android:id="@+id/tomato_builder_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="14dp"
+        android:textSize="24sp"
+        android:textColor="@color/config_activity_header_text_color"
+        android:text="@string/tomato_builder_title"
+        android:fontFamily="sans-serif-condensed-light"
+        app:layout_box="left|top"/>
+
+    <android.support.wearable.view.WearableListView
+        android:id="@+id/tomato_builder_tag_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        app:layout_box="left|right"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="left|bottom"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/tomoto_builder_preview_bg"
+        app:layout_box="left|bottom">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/config_activity_header_text_color"
+            android:text="@string/tomato_builder_preview"
+            android:fontFamily="sans-serif-condensed-light"
+            android:layout_gravity="bottom|left"
+            app:layout_box="left|bottom"/>
+        <TextView
+            android:id="@+id/tomato_builder_text_preview_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/config_activity_header_text_color"
+            android:text="Title"
+            android:fontFamily="sans-serif-condensed-light"
+            android:layout_gravity="bottom|left"
+            android:paddingLeft="10dp"
+            app:layout_box="left|bottom"/>
+        <TextView
+            android:id="@+id/tomato_builder_text_preview_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/config_activity_header_text_color"
+            android:text="Description"
+            android:fontFamily="sans-serif-condensed-light"
+            android:layout_gravity="bottom|left"
+            android:paddingLeft="10dp"
+            android:visibility="gone"
+            app:layout_box="left|bottom"/>
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="right|bottom"
+        android:layout_alignParentEnd="true"
+
+        app:layout_box="right|bottom">
+
+        <android.support.wearable.view.CircledImageView
+            android:id="@+id/tomato_builder_btn_mic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|top"
+            android:src="@drawable/icon_mic_2_100"
+            android:layout_marginBottom="25dp"
+            app:circle_color="@color/blue"
+            app:circle_radius="25dp"
+            app:circle_radius_pressed="20dp"/>
+
+        <android.support.wearable.view.CircledImageView
+            android:id="@+id/tomato_builder_btn_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:src="@drawable/icon_ok_3_100"
+            app:circle_color="@color/green"
+            app:circle_radius="25dp"
+            app:circle_radius_pressed="20dp"/>
+
+    </LinearLayout>
+</android.support.wearable.view.BoxInsetLayout>

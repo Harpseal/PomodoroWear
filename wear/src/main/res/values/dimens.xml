@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="analog_hand_stroke">3dp</dimen>
+    <dimen name="analog_hand_stroke_sec">3dp</dimen>
+    <dimen name="analog_hand_stroke_min">6dp</dimen>
+    <dimen name="analog_hand_stroke_min_shadow">8dp</dimen>
+    <dimen name="analog_hand_stroke_hour">12dp</dimen>
+
+    <dimen name="analog_hand_meter_sec">1dp</dimen>
+    <dimen name="analog_hand_meter_min">3dp</dimen>
+    <dimen name="analog_hand_meter_hour">6dp</dimen>
+
+    <dimen name="interactive_x_offset">15dp</dimen>
+    <dimen name="interactive_x_offset_round">25dp</dimen>
+    <dimen name="interactive_y_offset">72dp</dimen>
+    <dimen name="interactive_y_offset_round">84dp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="content_padding_start">12dp</dimen>
+    <dimen name="digital_config_item_margin">32dp</dimen>
+</resources>

@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">PomodoroWear</string>
+    <string name="my_analog_name">Pomodoro Analog</string>
+    <string name="pomodoro_config_name">Pomodoro watch face configuration</string>
+    <string name="pomodoro_config_title">Configuration</string>
+
+    <string name="tomato_builder_title">Create event</string>
+    <string name="tomato_builder_preview">Event Title Preview</string>
+
+
+    <string name="config_item_lv1_calendar">Calendar</string>
+    <string name="config_item_lv1_tomato">Pomodoro</string>
+    <string name="config_item_lv1_timer">Timer</string>
+    <string name="config_item_lv1_clear_event_queue">Clear Event Queue</string>
+
+
+
+    <string-array name="config_array_lv1">
+        <item>@string/config_item_lv1_calendar</item>
+        <item>@string/config_item_lv1_tomato</item>
+        <item>@string/config_item_lv1_timer</item>
+        <item>@string/config_item_lv1_clear_event_queue</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_timer1">Timer1</string>
+    <string name="config_item_lv2_timer2">Timer2</string>
+    <string name="config_item_lv2_timer3">Timer3</string>
+    <string name="config_item_lv2_timer4">Timer4</string>
+
+    <string-array name="config_array_lv2_timer">
+        <item>@string/config_item_lv2_timer1</item>
+        <item>@string/config_item_lv2_timer2</item>
+        <item>@string/config_item_lv2_timer3</item>
+        <item>@string/config_item_lv2_timer4</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_tomato_work">Work</string>
+    <string name="config_item_lv2_tomato_relax">Relax</string>
+    <string name="config_item_lv2_tomato_relax_long">Long Relax</string>
+
+    <string-array name="config_array_lv2_tomato">
+        <item>@string/config_item_lv2_tomato_work</item>
+        <item>@string/config_item_lv2_tomato_relax</item>
+        <item>@string/config_item_lv2_tomato_relax_long</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_calendar_msg">Loading calendar...</string>
+
+    <string-array name="config_array_lv2_calendar">
+        <item>@string/config_item_lv2_calendar_msg</item>
+    </string-array>
+
+</resources>

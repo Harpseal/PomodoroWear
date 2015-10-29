@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="analog_background">#000000</color>
+    <color name="analog_hands">#cccccc</color>
+    <color name="analog_meter">#ff4040</color>
+
+    <color name="config_activity_background">#000000</color>
+    <color name="config_activity_header_text_color">#ffffff</color>
+
+    <color name="config_item_circle_border_color">#ffffff</color>
+    <color name="config_item_label_color">#ffffff</color>
+</resources>
