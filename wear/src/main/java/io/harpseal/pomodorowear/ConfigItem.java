@@ -177,7 +177,8 @@ public class ConfigItem extends LinearLayout implements
         IT_Alarm_clock,
         IT_Factory,
         IT_Time,
-        IT_Work
+        IT_Work,
+        IT_Reflash
 
     }
 
@@ -186,7 +187,7 @@ public class ConfigItem extends LinearLayout implements
         switch (type)
         {
             case IT_Calendar:
-                mHeaderImage.setImageResource(R.drawable.icon_calendar_100);
+                mHeaderImage.setImageResource(R.drawable.ic_event_note_white_48px);
                 mHeaderImage.setCircleBorderColor(0);
                 break;
             case IT_Tomato_white:
@@ -198,7 +199,7 @@ public class ConfigItem extends LinearLayout implements
                 mHeaderImage.setCircleBorderColor(0);
                 break;
             case IT_Alarm_clock:
-                mHeaderImage.setImageResource(R.drawable.icon_alarm_clock_100);
+                mHeaderImage.setImageResource(R.drawable.ic_alarm_white_48px);
                 mHeaderImage.setCircleBorderColor(0);
                 break;
             case IT_Factory:
@@ -213,6 +214,10 @@ public class ConfigItem extends LinearLayout implements
                 mHeaderImage.setImageResource(R.drawable.icon_work_100);
                 mHeaderImage.setCircleBorderColor(0);
                 break;
+            case IT_Reflash:
+                mHeaderImage.setImageResource(R.drawable.ic_refresh_white_48px);
+                mHeaderImage.setCircleBorderColor(0);
+                break;
         }
     }
 
@@ -221,12 +226,15 @@ public class ConfigItem extends LinearLayout implements
         String strCal = getResources().getString(R.string.config_item_lv1_calendar);
         String strTomato = getResources().getString(R.string.config_item_lv1_tomato);
         String strTimer = getResources().getString(R.string.config_item_lv1_timer);
+        String strEventQueue = getResources().getString(R.string.config_item_lv1_clear_event_queue);
         if (itemName.equals(strCal))
             setImage(ImageType.IT_Calendar);
         else if (itemName.equals(strTomato))
             setImage(ImageType.IT_Tomato_color);
         else if (itemName.equals(strTimer))
             setImage(ImageType.IT_Alarm_clock);
+        else if (itemName.equals(strEventQueue))
+            setImage(ImageType.IT_Reflash);
     }
     public String getLebelName() {return mLabel.getText().toString();}
 
