@@ -388,6 +388,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             cal.set(Calendar.MILLISECOND, 0);
             mClockBase = cal.getTimeInMillis();
             mUpdateFlag |= DRAW_HOUR;
+            mUpdateFlagAmbient |= DRAW_HOUR;
         }
 
         @Override
@@ -817,6 +818,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
         private int DRAW_RESET = 0x10;
 
         private int mUpdateFlag = 0;
+        private int mUpdateFlagAmbient = 0;
 
 
         private void drawMeter(Canvas canvas, int drawFlag, long timeMS, float centerX,float centerY,
@@ -1017,8 +1019,18 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         (int)((float)mBitmapHour.getHeight()*scale), true);
             }
 
-            int drawFlag = mUpdateFlag;
-            mUpdateFlag = 0;
+            int drawFlag;
+            if (mAmbient)
+            {
+                drawFlag = mUpdateFlagAmbient;
+                mUpdateFlagAmbient = 0;
+            }
+            else
+            {
+                drawFlag = mUpdateFlag;
+                mUpdateFlag = 0;
+            }
+
             if (!mAmbient)
                 drawFlag |= DRAW_SEC;
             else
@@ -1099,9 +1111,9 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                 drawMeter(tmpCanvas, DRAW_HOUR, mTimerMS,timerX,timerY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,mDataTimerDateStart == mDataTimerDateEnd?0xff00b000:0xffff4040);
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,0xffff4040);
+                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,Color.YELLOW);
                 else
-                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,Color.YELLOW);
+                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,0xffff4040);
             }
 
             //if (isDrawDirect);
@@ -1112,9 +1124,9 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 canvas.drawBitmap(mCacheBitmapHour, 0, 0, mBackgroundPaint);
                 drawMeter(canvas, DRAW_SEC, mTimerMS, timerX, timerY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, mDataTimerDateStart == mDataTimerDateEnd ? 0xff00b000 : 0xffff4040);
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, 0xffff4040);
+                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, Color.YELLOW);
                 else
-                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, Color.GRAY, Color.YELLOW);
+                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, Color.GRAY, 0xffff4040);
             }
 
             //drawFlag|=DRAW_MIN;
@@ -1135,9 +1147,9 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                 drawMeter(tmpCanvas, DRAW_MIN, mTimerMS,timerX,timerY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,mDataTimerDateStart == mDataTimerDateEnd?0xff00b000:0xffff4040);
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,0xffff4040);
+                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,Color.YELLOW);
                 else
-                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,Color.YELLOW);
+                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,0xffff4040);
 
                 float minRot,minRotDeg;
                 //minRotDeg = minRot = ((float)minutes + (float)seconds /60f) / 30f;
@@ -1209,10 +1221,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         else if (mBatteryPredictionHourLeft < 0)
                             drawTextCentred(tmpCanvas, mInteractionTextPaint, "-- hr",centerX,centerY + meterYShift + meterLengthSec/2 );
                     //}
-
                     mBatteryPredictionCurrentLevel = batteryLevel;
-
-
                 }
 
 
@@ -1436,13 +1445,16 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mTomatoMS = mDataTomatoDateEnd == 0?Long.MAX_VALUE: mDataTomatoDateEnd - curMs;
 
             if ((mDataTimerDateEnd!= 0 && mTimerMSPre/hourLengthInMS != mTimerMS/hourLengthInMS) ||
-                (mDataTomatoDateEnd!= 0 && mTomatoMSPre/hourLengthInMS != mTomatoMS/hourLengthInMS))
-                mUpdateFlag|=DRAW_HOUR;
+                (mDataTomatoDateEnd!= 0 && mTomatoMSPre/hourLengthInMS != mTomatoMS/hourLengthInMS)) {
+                mUpdateFlag |= DRAW_HOUR;
+                mUpdateFlagAmbient |= DRAW_HOUR;
+            }
 
             //Log.d(TAG,"Update timer....");
             if (mDataTomatoDateEnd!= 0 && mTomatoMSPre>0 && mTomatoMS<=0 && mTomatoMSPre != Long.MAX_VALUE)
             {
-                mUpdateFlag = DRAW_MIN|DRAW_SEC;
+                mUpdateFlag |= DRAW_MIN|DRAW_SEC;
+                mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
                 mVibrator.vibrate(new long[]{10, 100, 10, 100, 10, 100}, -1);
 //                new Thread(){
 //                    @Override
@@ -1454,7 +1466,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
             }
             else if (mDataTimerDateEnd !=0 && mTimerMSPre>0 && mTimerMS<=0 && mTimerMSPre != Long.MAX_VALUE)
             {
-                mUpdateFlag = DRAW_MIN|DRAW_SEC;
+                mUpdateFlag |= DRAW_MIN|DRAW_SEC;
+                mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
                 mVibrator.vibrate(500);
 //                new Thread(){
 //                    @Override
@@ -1696,10 +1709,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     Log.w(TAG, "Ignoring unknown config key: " + configKey);
                 }
 
-                mCacheLastUpeateHour = -1;
-                mCacheLastUpeateMin = -1;
-                mCacheLastUpeateAmbienHour = -1;
-                //mUpdateFlag = DRAW_ALL;
+                mUpdateFlag = DRAW_ALL;
+                mUpdateFlagAmbient = DRAW_ALL;
                 //Log.d(TAG, "updateUiForConfigDataMap configKey:" + configKey + " sec: " + newTime);
 
             }

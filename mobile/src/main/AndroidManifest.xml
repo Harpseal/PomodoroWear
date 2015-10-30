@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.harpseal.pomodorowear"
-    android:versionCode="8"
-    android:versionName="1.0.0.7">
+    android:versionCode="45"
+    android:versionName="1.0.0.44" >
 
     <!-- Required to act as a custom watch face. -->
     <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
@@ -11,8 +11,7 @@
     <!-- Calendar permission used by CalendarWatchFaceService -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
-
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -34,12 +33,14 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".MessageListenerService">
+        <service android:name=".MessageListenerService" >
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
+
+        <activity android:name=".MainConfigActivity" >
+        </activity>
     </application>
 
 </manifest>

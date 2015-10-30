@@ -2,6 +2,7 @@ package io.harpseal.pomodorowear;
 
 import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -781,13 +782,16 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//        else
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, MainConfigActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        else
         if (id == R.id.action_calendar)
         {
             mCalendarAlertDialog.show();
+
             return true;
         }
         else if (id == R.id.action_tags)
