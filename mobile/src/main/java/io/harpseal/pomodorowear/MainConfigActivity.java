@@ -849,7 +849,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                     Log.i("MainActivity","id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
 
                     mCalendarList.add(new CalendarItem(id,displayName,accName,color));
-                    // …
+                    // 
                 } while (calCursor.moveToNext());
             }
 

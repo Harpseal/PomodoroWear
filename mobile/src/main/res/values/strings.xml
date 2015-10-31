@@ -60,22 +60,22 @@
     <string name="perf_screen_pomodoro_timer_summary">Timers for Work, Relax and Long Relax</string>
 
     <string name="perf_item_pomodoro_calendar">Calendar</string>
-    <string name="perf_item_pomodoro_calendar_summary">請選擇儲存Pomodoro事件的Google Calendar</string>
+    <string name="perf_item_pomodoro_calendar_summary">請選�儲存Pomodoro事件�Google Calendar</string>
     <string name="perf_item_pomodoro_tags">Tags</string>
-    <string name="perf_item_pomodoro_tags_summary">Tags用於快速生成Pomodoro事件標題</string>
+    <string name="perf_item_pomodoro_tags_summary">Tags�於快速�Pomodoro事件標�</string>
 
-    <string name="perf_item_pomodoro_work">設定工作時間長度</string>
-    <string name="perf_item_pomodoro_relax">設定休息時間長度</string>
-    <string name="perf_item_pomodoro_relax_long">設定長休息時間長度</string>
+    <string name="perf_item_pomodoro_work">設�工��度</string>
+    <string name="perf_item_pomodoro_relax">設�休息��度</string>
+    <string name="perf_item_pomodoro_relax_long">設���長�/string>
 
 
     <string name="perf_category_timer">Timer Configuration</string>
-    <string name="perf_item_timer1">設定Timer1時間長度</string>
-    <string name="perf_item_timer2">設定Timer2時間長度</string>
-    <string name="perf_item_timer3">設定Timer3時間長度</string>
-    <string name="perf_item_timer4">設定Timer4時間長度</string>
+    <string name="perf_item_timer1">設�Timer1��度</string>
+    <string name="perf_item_timer2">設�Timer2��度</string>
+    <string name="perf_item_timer3">設�Timer3��度</string>
+    <string name="perf_item_timer4">設�Timer4��度</string>
 
-    <string name="dialog_tag_editor_is_default_checked">預設選取</string>
+    <string name="dialog_tag_editor_is_default_checked">�設��</string>
 
 
 </resources>
