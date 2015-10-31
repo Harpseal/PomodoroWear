@@ -839,6 +839,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                     null,
                                     CalendarContract.Calendars._ID + " ASC");
             if (calCursor.moveToFirst()) {
+                ArrayList<DataMap> calMapList = new ArrayList<DataMap>();
                 do {
                     long id = calCursor.getLong(0);
                     String displayName = calCursor.getString(1);
@@ -849,8 +850,27 @@ public class MainConfigActivity extends PreferenceActivity implements
                     Log.i("MainActivity","id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
 
                     mCalendarList.add(new CalendarItem(id,displayName,accName,color));
-                    // 
+                    //
+
+                    DataMap map = new DataMap();
+                    map.putLong(CalendarContract.Calendars._ID,id);
+                    map.putString(CalendarContract.Calendars.NAME, displayName);
+                    map.putString(CalendarContract.Calendars.ACCOUNT_NAME, accName);
+                    map.putInt(CalendarContract.Calendars.CALENDAR_COLOR, color);
+
+                    calMapList.add(map);
                 } while (calCursor.moveToNext());
+
+                DataMap calMap = new DataMap();
+                calMap.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST, calMapList);
+                byte[] rawData = calMap.toByteArray();
+                Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+
+                Log.d("uploadCalendarList", "Sent watch face config message: " + WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST);
+                for (DataMap map : calMapList)
+                {
+                    Log.d("uploadCalendarList", "[" + map.toString() + "]");
+                }
             }
 
             SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());

@@ -2,7 +2,9 @@ package io.harpseal.pomodorowear;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CalendarContract;
 import android.util.Log;
@@ -33,7 +35,6 @@ public class MessageListenerService extends WearableListenerService {
     private int mNumberOfMessage = 0;
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        //showToast(messageEvent.getPath());
         if (messageEvent.getPath().equals(WatchFaceUtil.PATH_WITH_MESSAGE)) {
             mNumberOfMessage ++ ;
             //intent.putExtra("Message", new String(messageEvent.getData()));
@@ -58,9 +59,20 @@ public class MessageListenerService extends WearableListenerService {
                 {
                     Log.d(TAG,"MSG_TYPE_BATTERY");
                 }
+                else if (key == WatchFaceUtil.MSG_TYPE_UPDATE_CALENDAR_LIST)
+                {
+                    new Thread(){
+                        @Override
+                        public void run()
+                        {
+                            uploadCalendarList(MessageListenerService.this);
+                        }
+                    }.start();
+                }
             }
             return;
         }
+
     }
 
     private void showToast(String message) {
@@ -177,6 +189,97 @@ public class MessageListenerService extends WearableListenerService {
                 Log.v(TAG, "Wear ERROR: no node to send....");
 
             client.disconnect();
+        }
+    }
+
+
+    public static void uploadCalendarList(Context context)
+    {
+        String nodeId;
+        GoogleApiClient client;
+
+        String[] projection =
+                new String[]{
+                        CalendarContract.Calendars._ID,
+                        CalendarContract.Calendars.NAME,
+                        CalendarContract.Calendars.ACCOUNT_NAME,
+                        CalendarContract.Calendars.ACCOUNT_TYPE,
+                        CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
+                        CalendarContract.Calendars.CALENDAR_COLOR};
+
+        String permission;
+        permission = "android.permission.READ_CALENDAR";
+        int res = context.checkCallingOrSelfPermission(permission);
+        if (res == PackageManager.PERMISSION_GRANTED) {
+
+            client = new GoogleApiClient.Builder(context)
+                    //.addConnectionCallbacks(this)
+                    //.addOnConnectionFailedListener(this)
+                    .addApi(Wearable.API)
+                    .build();
+
+            if (!client.isConnected()) {
+                ConnectionResult connRes = client.blockingConnect(1000, TimeUnit.MILLISECONDS);
+                if (!connRes.isSuccess())
+                {
+                    Log.e("uploadCalendarList","Can't connect to GoogleApiClient...");
+                    return;
+                }
+
+            }
+            NodeApi.GetConnectedNodesResult result =
+                    Wearable.NodeApi.getConnectedNodes(client).await();
+
+            List<Node> nodes = result.getNodes();
+            //for (Node n : nodes)
+            //    Log.d(TAG,"Node " + n.getId() + "  " + n.getDisplayName());
+            if (nodes.size() > 0) {
+
+                nodeId = nodes.get(0).getId();
+
+                Cursor calCursor =
+                        context.getContentResolver().
+                                query(CalendarContract.Calendars.CONTENT_URI,
+                                        projection,
+                                        CalendarContract.Calendars.VISIBLE + " = 1 " + "AND " +
+                                                CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL + " >= " + CalendarContract.Calendars.CAL_ACCESS_OVERRIDE,
+                                        null,
+                                        CalendarContract.Calendars._ID + " ASC");
+                if (calCursor.moveToFirst()) {
+                    ArrayList<DataMap> calMapList = new ArrayList<DataMap>();
+                    do {
+                        long id = calCursor.getLong(0);
+                        String displayName = calCursor.getString(1);
+                        String accName = calCursor.getString(2);
+                        //String accType = calCursor.getString(3);
+                        String accLevel = calCursor.getString(4);
+                        int color = calCursor.getInt(5);
+                        Log.i("MainActivity", "id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
+
+
+                        DataMap map = new DataMap();
+                        map.putLong(CalendarContract.Calendars._ID,id);
+                        map.putString(CalendarContract.Calendars.NAME, displayName);
+                        map.putString(CalendarContract.Calendars.ACCOUNT_NAME, accName);
+                        map.putInt(CalendarContract.Calendars.CALENDAR_COLOR, color);
+
+                        calMapList.add(map);
+
+                    } while (calCursor.moveToNext());
+                    DataMap calMap = new DataMap();
+                    calMap.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST, calMapList);
+                    byte[] rawData = calMap.toByteArray();
+                    Wearable.MessageApi.sendMessage(client, nodeId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+
+                    Log.d("uploadCalendarList", "Sent watch face config message: " + WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST);
+                    for (DataMap map : calMapList)
+                    {
+                        Log.d("uploadCalendarList", "[" + map.toString() + "]");
+                    }
+
+                }
+            }
+
         }
     }
 }

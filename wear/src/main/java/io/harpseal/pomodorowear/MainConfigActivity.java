@@ -51,6 +51,7 @@ public class MainConfigActivity extends Activity implements
     private WearableListView mConfigListView;
     private BoxInsetLayout mConfigContent;
 
+    private ArrayList<DataMap> mCalendarList = null;
     public enum ConfigType
     {
         CT_Lv1,
@@ -74,6 +75,7 @@ public class MainConfigActivity extends Activity implements
     private long mCalendarID = WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_ID;
     private String mCalendarName = WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_NAME;
     private int mCalendarColor = WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_COLOR;
+    private String mCalendarAccountName = WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_ACCOUNT_NAME;
 
     private ArrayList<DataMap> mTomatoEventQueue = null;
 
@@ -146,35 +148,6 @@ public class MainConfigActivity extends Activity implements
                 .addApi(Wearable.API)
                 .build();
 
-//        mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-//                    @Override
-//                    public void onConnected(Bundle connectionHint) {
-//                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                            Log.d(TAG, "onConnected: " + connectionHint);
-//                        }
-//
-//                        Wearable.DataApi.addListener(mGoogleApiClient, this);
-//                        updateConfigDataItemAndUiOnStartup();
-//                    }
-//
-//                    @Override
-//                    public void onConnectionSuspended(int cause) {
-//                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                            Log.d(TAG, "onConnectionSuspended: " + cause);
-//                        }
-//                    }
-//                })
-//                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-//                    @Override
-//                    public void onConnectionFailed(ConnectionResult result) {
-//                        if (Log.isLoggable(TAG, Log.DEBUG)) {
-//                            Log.d(TAG, "onConnectionFailed: " + result);
-//                        }
-//                    }
-//                })
-//                .addApi(Wearable.API)
-//                .build();
     }
 
     @Override
@@ -287,11 +260,12 @@ public class MainConfigActivity extends Activity implements
             ConfigType ctype = ConfigType.CT_Unknown;
 
 
-            if (strCur.equals(strCal)) {
-                Intent i = new Intent(getApplicationContext(), CalendarPickerActivity.class);
-                startActivity(i);
-            }
-            else if (strCur.equals(strClearEventQueue)) {
+//            if (strCur.equals(strCal)) {
+//                Intent i = new Intent(getApplicationContext(), CalendarPickerActivity.class);
+//                startActivity(i);
+//            }
+//            else
+            if (strCur.equals(strClearEventQueue)) {
                 if (mTomatoEventQueue != null && mTomatoEventQueue.size()!=0)
                 {
                     DataMap emtpyQueue = new DataMap();
@@ -304,6 +278,8 @@ public class MainConfigActivity extends Activity implements
                     ctype = ConfigType.CT_Tomato;
                 else if (strCur.equals(strTimer))
                     ctype = ConfigType.CT_Timer;
+                else if (strCur.equals(strCal))
+                    ctype = ConfigType.CT_Calendar;
 
 
                 if (ctype != ConfigType.CT_Unknown) {
@@ -313,6 +289,28 @@ public class MainConfigActivity extends Activity implements
                 }
             }
 
+        }
+        else if (mConfigType == ConfigType.CT_Calendar)
+        {
+            int idx = configItemViewHolder.getAdapterPosition();
+            if (mCalendarList!=null && idx>=0 && idx<mCalendarList.size())
+            {
+                DataMap calMap = mCalendarList.get(idx);
+                DataMap config = new DataMap();
+
+                mCalendarID = calMap.getLong(CalendarContract.Calendars._ID, 0);
+                mCalendarName = calMap.getString(CalendarContract.Calendars.NAME, "");
+                mCalendarAccountName = calMap.getString(CalendarContract.Calendars.ACCOUNT_NAME, WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_ACCOUNT_NAME);
+                mCalendarColor = calMap.getInt(CalendarContract.Calendars.CALENDAR_COLOR, WatchFaceUtil.DEFAULT_TOMATO_CALENDAR_COLOR);
+
+                config.putLong(WatchFaceUtil.KEY_TOMATO_CALENDAR_ID, mCalendarID);
+                config.putString(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME, mCalendarName);
+                config.putString(WatchFaceUtil.KEY_TOMATO_CALENDAR_ACCOUNT_NAME, mCalendarAccountName);
+                config.putInt(WatchFaceUtil.KEY_TOMATO_CALENDAR_COLOR, mCalendarColor);
+
+                WatchFaceUtil.overwriteKeysInConfigDataMap(mGoogleApiClient, config);
+                finish();
+            }
         }
         else if (mConfigType == ConfigType.CT_Timer)
         {
@@ -399,11 +397,23 @@ public class MainConfigActivity extends Activity implements
 
 
     private class ConfigItemListAdapter extends WearableListView.Adapter {
-        private final String[] mItems;
+        private String[] mItems;
+        private int[] mColors = null;
 
         public ConfigItemListAdapter(String[] items) {
             mItems = items;
         }
+
+        public void setItems(String[] items)
+        {
+            mItems = items;
+        }
+
+        public void setColors(int[] colors)
+        {
+            mColors = colors;
+        }
+
 
         @Override
         public ConfigItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -414,6 +424,11 @@ public class MainConfigActivity extends Activity implements
         public void onBindViewHolder(WearableListView.ViewHolder holder, int position) {
             ConfigItemViewHolder configItemViewHolder = (ConfigItemViewHolder) holder;
             String itemName = mItems[position];
+            if (mColors != null && position < mColors.length)
+            {
+                configItemViewHolder.mConfigItem.setColor(mColors[position]);
+                configItemViewHolder.mConfigItem.setCircleBorderColor(0);
+            }
 
             if (mConfigType == ConfigType.CT_Lv1) {
                 configItemViewHolder.mConfigItem.setItemName(itemName);
@@ -623,6 +638,23 @@ public class MainConfigActivity extends Activity implements
                     Log.d(TAG,map.toString());
                 }
                 Log.d(TAG,WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE + " size is " + mTomatoEventQueue.size());
+            } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST)) {
+                mCalendarList = config.getDataMapArrayList(configKey);
+                if (mConfigType == ConfigType.CT_Calendar && mCalendarList.size()!=0)
+                {
+                    String[] calNameArray = new String[mCalendarList.size()];
+                    int[] calColorArray = new int[mCalendarList.size()];
+                    for (int i=0;i<mCalendarList.size();i++)
+                    {
+                        calNameArray[i] = mCalendarList.get(i).getString(CalendarContract.Calendars.NAME,"");
+                        calColorArray[i] = mCalendarList.get(i).getInt(CalendarContract.Calendars.CALENDAR_COLOR, 0);
+                    }
+                    mListAdapter.setItems(calNameArray);
+                    mListAdapter.setColors(calColorArray);
+                    mListAdapter.notifyDataSetChanged();
+                    //mConfigListView.setAdapter(mListAdapter);
+                    //mC
+                }
             } else {
                 Log.w(TAG, "Ignoring unknown config key: " + configKey);
             }

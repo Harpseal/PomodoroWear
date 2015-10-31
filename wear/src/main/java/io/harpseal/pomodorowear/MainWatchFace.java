@@ -1577,6 +1577,16 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     WatchFaceUtil.DEFAULT_TIMER_ZERO);
             addIntKeyIfMissingLong(config, WatchFaceUtil.KEY_TOMATO_DATE_END,
                     WatchFaceUtil.DEFAULT_TIMER_ZERO);
+
+            if (!config.containsKey(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST)) {
+                DataMap eventMsgMap = new DataMap();
+                eventMsgMap.putLong(WatchFaceUtil.MSG_ID_KEY, System.currentTimeMillis());
+                eventMsgMap.putString(WatchFaceUtil.MSG_SENDER_KEY, WatchFaceUtil.MSG_SENDER_WATCH_FACE);
+                eventMsgMap.putInt(WatchFaceUtil.MSG_TYPE_KEY, WatchFaceUtil.MSG_TYPE_UPDATE_CALENDAR_LIST);
+
+                Log.d(TAG, "Send update calendar msg..." + eventMsgMap.toString());
+                new SendActivityPhoneMessage(eventMsgMap).start();
+            }
             //KEY_TOMATO_TYPE
         }
 
@@ -1696,6 +1706,18 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         eventMsgMap.putInt(WatchFaceUtil.MSG_TYPE_KEY, WatchFaceUtil.MSG_TYPE_CREATE_EVENT);
 
                         Log.d(TAG,"Send create event msg..." + eventMsgMap.toString());
+                        new SendActivityPhoneMessage(eventMsgMap).start();
+                    }
+                } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST)) {
+                    ArrayList<DataMap> calList = config.getDataMapArrayList(configKey);
+                    if (calList == null || calList.size() == 0)
+                    {
+                        DataMap eventMsgMap = new DataMap();
+                        eventMsgMap.putLong(WatchFaceUtil.MSG_ID_KEY, System.currentTimeMillis());
+                        eventMsgMap.putString(WatchFaceUtil.MSG_SENDER_KEY, WatchFaceUtil.MSG_SENDER_WATCH_FACE);
+                        eventMsgMap.putInt(WatchFaceUtil.MSG_TYPE_KEY, WatchFaceUtil.MSG_TYPE_UPDATE_CALENDAR_LIST);
+
+                        Log.d(TAG, "Send update calendar msg..." + eventMsgMap.toString());
                         new SendActivityPhoneMessage(eventMsgMap).start();
                     }
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TYPE)) {

@@ -68,7 +68,7 @@ public class ConfigItem extends LinearLayout implements
         mSubLabel.setVisibility(GONE);
         mHeaderImage.setCircleRadius(radius);
         mHeaderImage.setCircleRadiusPressed(radius+2);
-        mHeaderImage.setLayoutParams(new android.widget.LinearLayout.LayoutParams((int)radius*2+4,LayoutParams.MATCH_PARENT));
+        mHeaderImage.setLayoutParams(new android.widget.LinearLayout.LayoutParams((int) radius * 2 + 4, LayoutParams.MATCH_PARENT));
         init(radius);
 
     }
@@ -104,7 +104,7 @@ public class ConfigItem extends LinearLayout implements
         mExpandSubLabelAnimator = ObjectAnimator.ofFloat(mSubLabel, "alpha",
                 SHRINK_LABEL_ALPHA, EXPAND_LABEL_ALPHA);
         mExpandAnimator = new AnimatorSet().setDuration(ANIMATION_DURATION_MS);
-        mExpandAnimator.playTogether(mExpandCircleAnimator,mExpandCircleAlphaAnimator, mExpandLabelAnimator,mExpandSubLabelAnimator);
+        mExpandAnimator.playTogether(mExpandCircleAnimator, mExpandCircleAlphaAnimator, mExpandLabelAnimator, mExpandSubLabelAnimator);
     }
 
     @Override
@@ -164,6 +164,10 @@ public class ConfigItem extends LinearLayout implements
 
     public void setColor(int color) {
         mHeaderImage.setCircleColor(color);
+    }
+
+    public void setCircleBorderColor(int color) {
+        mHeaderImage.setCircleBorderColor(color);
     }
 
     public int getColor() {

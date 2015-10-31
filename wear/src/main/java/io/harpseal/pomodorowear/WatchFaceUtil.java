@@ -51,6 +51,7 @@ public final class WatchFaceUtil {
 
     //public static final String KEY_TOMATO_EVENTS = "KEY_TOMATO_EVENTS";//type: Long
     public static final String KEY_TOMATO_EVENT_QUEUE = "KEY_TOMATO_EVENT_QUEUE";//type: ArrayList<DataMap>
+    public static final String KEY_TOMATO_CALENDAR_LIST = "KEY_TOMATO_CALENDAR_LIST";//type: ArrayList<DataMap>
 
     public static final String KEY_TOMATO_CALENDAR_ID = "KEY_TOMATO_CALENDAR_ID"; //Long
     public static final String KEY_TOMATO_CALENDAR_NAME = "KEY_TOMATO_CALENDAR_NAME"; //string
@@ -123,6 +124,7 @@ public final class WatchFaceUtil {
     public static final String MSG_TYPE_KEY = "MSG_TYPE_KEY";
     public static final int MSG_TYPE_BATTERY = 0; //return value : int
     public static final int MSG_TYPE_CREATE_EVENT = 1;//return value : int
+    public static final int MSG_TYPE_UPDATE_CALENDAR_LIST = 2;//return value : int
 
     public static final String MSG_RESULT_INT_KEY = "MSG_RESULT_INT_KEY";
     public static final String MSG_RESULT_STRING_KEY = "MSG_RESULT_STRING_KEY";
