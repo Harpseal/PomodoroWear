@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|top"
-            android:src="@drawable/icon_mic_100"
+            android:src="@drawable/ic_mic_white_48px"
             android:layout_marginBottom="25dp"
             app:circle_color="@color/blue"
             app:circle_radius="25dp"
@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|bottom"
-            android:src="@drawable/icon_checked_100"
+            android:src="@drawable/ic_check_white_48px"
             app:circle_color="@color/green"
             app:circle_radius="25dp"
             app:circle_radius_pressed="20dp"/>

@@ -1,21 +1,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <!--item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" /-->
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:icon="@drawable/ic_more_vert_white_36px"
+        android:orderInCategory="300"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_calendar"
         android:orderInCategory="200"
         android:title="Calendar"
-        android:icon="@drawable/icon_cal_filled_100"
+        android:icon="@drawable/ic_event_note_white_36px"
         app:showAsAction="ifRoom"
         ></item>
 
     <item
         android:id="@+id/action_tags"
-        android:orderInCategory="200"
+        android:orderInCategory="100"
         android:title="Calendar"
-        android:icon="@drawable/icon_tags_100"
+        android:icon="@drawable/ic_label_outline_white_36px"
         app:showAsAction="ifRoom"
         ></item>
 </menu>

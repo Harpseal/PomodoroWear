@@ -2,6 +2,7 @@ package io.harpseal.pomodorowear;
 
 import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -100,7 +101,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private AlertDialog mTagAlertDialog;
     private DynamicListView mTagDynListView;
-    private ArrayList<String> mTagList;
+
+    private WatchFaceUtil.PomodoroTagList mPromodoroTagList;
     private DynamicArrayAdapter mTagDynAdapter;
 
     private GoogleApiClient mGoogleApiClient;
@@ -220,14 +222,14 @@ public class MainActivity extends AppCompatActivity implements
         mTagDynListView = new DynamicListView(this);
         mTagDynListView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        mTagList = new ArrayList<String>();
-        for (int i = 0; i < WatchFaceUtil.DEFAULT_TOMATO_TAGS.length; ++i) {
-            mTagList.add(WatchFaceUtil.DEFAULT_TOMATO_TAGS[i]);
-        }
 
-        mTagDynAdapter = new DynamicArrayAdapter(this, R.layout.dyn_text_view, mTagList);
+        mPromodoroTagList = new WatchFaceUtil.PomodoroTagList();
+        mPromodoroTagList.setByStringArray(WatchFaceUtil.DEFAULT_TOMATO_TAGS);
 
-        mTagDynListView.setDynamicArrayList(mTagList);
+
+        mTagDynAdapter = new DynamicArrayAdapter(this, R.layout.dyn_text_view, mPromodoroTagList);
+
+        mTagDynListView.setDynamicArrayList(mPromodoroTagList);
         mTagDynListView.setAdapter(mTagDynAdapter);
         mTagDynListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mTagDynListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -240,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements
                 final android.widget.EditText input = new android.widget.EditText(MainActivity.this);
 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                 input.setInputType(InputType.TYPE_CLASS_TEXT);// | InputType.TYPE_TEXT_VARIATION_PASSWORD
-                if (position>=0 && position<mTagList.size())
-                    input.setText(mTagList.get(position));
+                if (position>=0 && position<mPromodoroTagList.size())
+                    input.setText(mPromodoroTagList.get(position).getName());
                 builder.setView(input);
 
 // Set up the buttons
@@ -250,8 +252,8 @@ public class MainActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialog, int which) {
                         //m_Text = input.getText().toString();
                         Log.v(TAG, "Text input :[" + input.getText().toString() + "]");
-                        mTagList.set(position, input.getText().toString());
-                        mTagDynAdapter.setList(mTagList);
+                        mPromodoroTagList.get(position).setName(input.getText().toString());
+                        mTagDynAdapter.setList(mPromodoroTagList);
                         mTagDynAdapter.notifyDataSetChanged();
                         mTagAlertDialog.show();
                     }
@@ -267,8 +269,8 @@ public class MainActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialog, int whichButton) {
                         // Do nothing.
                         //dialog.dismiss();
-                        mTagList.remove(position);
-                        mTagDynAdapter.setList(mTagList);
+                        mPromodoroTagList.remove(position);
+                        mTagDynAdapter.setList(mPromodoroTagList);
                         mTagDynAdapter.notifyDataSetChanged();
                         mTagAlertDialog.show();
 
@@ -286,11 +288,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setView(mTagDynListView)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        //do nothing...yet
-
-                        String[] tagList = mTagList.toArray(new String[mTagList.size()]);
-                        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_TAGS,tagList);
-
+                        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_TAG_LIST, mPromodoroTagList.toDataMapArray());
                         dialog.dismiss();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -320,8 +318,8 @@ public class MainActivity extends AppCompatActivity implements
                                     public void onClick(DialogInterface dialog, int which) {
                                         //m_Text = input.getText().toString();
                                         Log.v(TAG, "Text input :[" + input.getText().toString() + "]");
-                                        mTagList.add(input.getText().toString());
-                                        mTagDynAdapter.setList(mTagList);
+                                        mPromodoroTagList.add(new WatchFaceUtil.PomodoroTag(input.getText().toString(),0));
+                                        mTagDynAdapter.setList(mPromodoroTagList);
 
                                         mTagAlertDialog.show();
                                     }
@@ -496,14 +494,9 @@ public class MainActivity extends AppCompatActivity implements
             else if (configKey.equals(WatchFaceUtil.KEY_TIMER1)) {
                 newTime = config.getInt(configKey);
                 uiUpdated = true;
-            } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TAGS)) {
-                String[] array = config.getStringArray(configKey);
-                mTagList.clear();
-                for (int i = 0; i < array.length; ++i) {
-                    mTagList.add(array[i]);
-                    Log.d(TAG,"[" + array[i] + "]");
-                }
-                mTagDynAdapter.setList(mTagList);
+            } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TAG_LIST)) {
+                mPromodoroTagList.setByDataMapArray(config.getDataMapArrayList(configKey));
+                mTagDynAdapter.setList(mPromodoroTagList);
                 mTagDynAdapter.notifyDataSetChanged();
                 uiUpdated = true;
             }
@@ -699,8 +692,8 @@ public class MainActivity extends AppCompatActivity implements
             byte[] rawData = config.toByteArray();
             Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
 
-           // if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Sent watch face config message: " + configKey + " -> "
+            // if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Sent watch face config message: " + configKey + " -> "
                         + Integer.toHexString(value));
            // }
         }
@@ -754,6 +747,23 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void sendConfigUpdateMessage(String configKey, ArrayList<DataMap> arrayMap) {
+        if (mPeerId != null) {
+            DataMap config = new DataMap();
+            config.putDataMapArrayList(configKey, arrayMap);
+            byte[] rawData = config.toByteArray();
+            Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+
+//            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Sent watch face config message: " + configKey);
+            for (DataMap map : arrayMap)
+            {
+                Log.d(TAG, "[" + map.toString() + "]");
+            }
+//            }
+        }
+    }
+
     private void sendCalendarConfigUpdateMessage()
     {
         if (mSelectedCalendarListIdx <0 ||mSelectedCalendarListIdx>=mCalendarList.size()) return;
@@ -781,13 +791,16 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//        else
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, MainConfigActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        else
         if (id == R.id.action_calendar)
         {
             mCalendarAlertDialog.show();
+
             return true;
         }
         else if (id == R.id.action_tags)

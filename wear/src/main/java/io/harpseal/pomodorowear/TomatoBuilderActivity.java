@@ -52,7 +52,7 @@ public class TomatoBuilderActivity extends Activity implements
 
     private GoogleApiClient mGoogleApiClient;
 
-    private String[] mTags = WatchFaceUtil.DEFAULT_TOMATO_TAGS;
+    private WatchFaceUtil.PomodoroTagList mPomodoraTagList = new WatchFaceUtil.PomodoroTagList();
 
     private TagListAdapter mListAdapter;
     private final int RESULT_RECOGNIZE_SPEECH = 100;
@@ -67,6 +67,8 @@ public class TomatoBuilderActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tomato_builder);
+
+        mPomodoraTagList.setByStringArray(WatchFaceUtil.DEFAULT_TOMATO_TAGS);
 
         mHeader = (TextView) findViewById(R.id.tomato_builder_header);
         mTagListView = (android.support.wearable.view.WearableListView) findViewById(R.id.tomato_builder_tag_list);
@@ -96,7 +98,7 @@ public class TomatoBuilderActivity extends Activity implements
         mTagListView.setClickListener(this);
         mTagListView.addOnScrollListener(this);
 
-        mListAdapter = new TagListAdapter(mTags);
+        mListAdapter = new TagListAdapter(mPomodoraTagList);
         mTagListView.setAdapter(mListAdapter);
 
 
@@ -295,20 +297,21 @@ public class TomatoBuilderActivity extends Activity implements
     public void onCentralPositionChanged(int centralPosition) {}
 
     private class TagListAdapter extends WearableListView.Adapter {
-        private String[] mItems;
+        private WatchFaceUtil.PomodoroTagList mTagList;
         private boolean[] mSelected;
         private final float mCircleRadius = 16;
 
-        public TagListAdapter(String[] items) {
-            setTags(items);
+        public TagListAdapter(WatchFaceUtil.PomodoroTagList taglist) {
+            setTags(taglist);
         }
 
-        public void setTags(String[] tags)
+        public void setTags(WatchFaceUtil.PomodoroTagList taglist)
         {
-            mItems = tags;
-            mSelected = new boolean[tags.length];
-            for (int i=0;i<mSelected.length;i++)
-                mSelected[i] = false;
+            mTagList = taglist;
+            mSelected = new boolean[taglist.size()];
+            for (int i=0;i<mSelected.length;i++) {
+                mSelected[i] = taglist.get(i).getIsEnableDefault();
+            }
         }
 
         public void setSelected(int pos,boolean isSelected)
@@ -326,7 +329,7 @@ public class TomatoBuilderActivity extends Activity implements
         public String getTag(int pos)
         {
             if (pos>=0 && pos<mSelected.length)
-                return mItems[pos];
+                return mTagList.get(pos).getName();
             return "";
         }
         @Override
@@ -337,7 +340,7 @@ public class TomatoBuilderActivity extends Activity implements
         @Override
         public void onBindViewHolder(WearableListView.ViewHolder holder, int position) {
             TagViewHolder configItemViewHolder = (TagViewHolder) holder;
-            String itemName = mItems[position];
+            String itemName = mTagList.get(position).getName();
             if (mSelected[position])
                 configItemViewHolder.mTagItem.setColor(Color.WHITE);
             else
@@ -390,7 +393,7 @@ public class TomatoBuilderActivity extends Activity implements
             // Add margins to first and last item to make it possible for user to tap on them.
             if (position == 0) {
                 layoutParams.setMargins(0, colorPickerItemMargin, 0, 0);
-            } else if (position == mItems.length - 1) {
+            } else if (position == mTagList.size() - 1) {
                 layoutParams.setMargins(0, 0, 0, colorPickerItemMargin);
             } else {
                 layoutParams.setMargins(0, 0, 0, 0);
@@ -400,7 +403,7 @@ public class TomatoBuilderActivity extends Activity implements
 
         @Override
         public int getItemCount() {
-            return mItems.length;
+            return mTagList.size();
         }
     }
 
@@ -432,7 +435,8 @@ public class TomatoBuilderActivity extends Activity implements
     }
 
     private void setDefaultValuesForMissingConfigKeys(DataMap config) {
-        addIntKeyIfMissingStringArray(config,WatchFaceUtil.KEY_TOMATO_TAGS,WatchFaceUtil.DEFAULT_TOMATO_TAGS);
+        //addIntKeyIfMissingStringArray(config,WatchFaceUtil.KEY_TOMATO_TAGS,WatchFaceUtil.DEFAULT_TOMATO_TAGS);
+        addIntKeyIfMissingDataMapArray(config, WatchFaceUtil.KEY_TOMATO_TAG_LIST,mPomodoraTagList.toDataMapArray());
         addIntKeyIfMissingDataMapArray(config, WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE, null);
     }
 
@@ -484,8 +488,9 @@ public class TomatoBuilderActivity extends Activity implements
 
             int newTime = -1;
 
-            if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TAGS)) {
-                mTags = config.getStringArray(configKey);
+            if (configKey.equals(WatchFaceUtil.KEY_TOMATO_TAG_LIST)) {
+                ArrayList<DataMap> arrayMap = config.getDataMapArrayList(WatchFaceUtil.KEY_TOMATO_TAG_LIST);
+                mPomodoraTagList.setByDataMapArray(arrayMap);
                 uiUpdated = true;
 
             }else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE)) {
@@ -504,7 +509,7 @@ public class TomatoBuilderActivity extends Activity implements
 
         if (uiUpdated)
         {
-            mListAdapter.setTags(mTags);
+            mListAdapter.setTags(mPomodoraTagList);
             mListAdapter.notifyDataSetChanged();
         }
 

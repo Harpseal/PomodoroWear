@@ -19,6 +19,7 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +45,10 @@ public final class WatchFaceUtil {
     public static final String KEY_TOMATO_DATE_START = "KEY_TOMATO_DATE_START";//type: Long
     public static final String KEY_TOMATO_DATE_END = "KEY_TOMATO_DATE_END";//type: Long
 
-    public static final String KEY_TOMATO_TAGS = "KEY_TOMATO_TAGS";//WORK,RELAX,RELAX_LONG,IDLE
+    public static final String KEY_TOMATO_TAG_LIST = "KEY_TOMATO_TAG_LIST";//type: ArrayList<DataMap>
+    public static final String KEY_TOMATO_TAG_NAME = "KEY_TOMATO_TAG_NAME";//string
+    public static final String KEY_TOMATO_TAG_FLAG = "KEY_TOMATO_TAG_FLAG";//int
+
     //public static final String KEY_TOMATO_EVENTS = "KEY_TOMATO_EVENTS";//type: Long
     public static final String KEY_TOMATO_EVENT_QUEUE = "KEY_TOMATO_EVENT_QUEUE";//type: ArrayList<DataMap>
 
@@ -282,5 +286,127 @@ public final class WatchFaceUtil {
         explicitIntent.setComponent(component);
 
         return explicitIntent;
+    }
+
+    public static final class PomodoroTagList extends ArrayList<PomodoroTag>
+    {
+        public void setByStringArray(String [] array)
+        {
+            clear();
+            for (String str : array)
+            {
+                add(new PomodoroTag(str,0));
+            }
+        }
+
+        public void setByArray(String [] arrayName,int[] arrayFlag)
+        {
+            if (arrayName.length != arrayFlag.length) return;
+            clear();
+            for (int i=0;i<arrayName.length;i++)
+            {
+                add(new PomodoroTag(arrayName[i],arrayFlag[i]));
+            }
+        }
+
+        public void setByDataMapArray(ArrayList<DataMap> arrayMap)
+        {
+            clear();
+            for (DataMap map:arrayMap)
+            {
+                add(new PomodoroTag(map));
+            }
+        }
+
+        public String[] toStringArray()
+        {
+            if (size() == 0) return null;
+            String[] array = new String[size()];
+            for (int i=0;i<size();i++)
+            {
+                array[i] = get(i).name;
+            }
+            return  array;
+        }
+
+        public ArrayList<DataMap> toDataMapArray()
+        {
+            ArrayList<DataMap> arrayMap = new ArrayList<DataMap>();
+            for (PomodoroTag tag : this)
+            {
+                arrayMap.add(tag.toDataMap());
+            }
+            return arrayMap;
+        }
+    }
+
+    public static class PomodoroTag
+    {
+        final int FLAG_ENABLE_DEFAULT = 0x1;
+        final int FLAG_AUTO_ENABLE_BY_DESCRIPTION = 0x2;
+        private String name = "";
+        private int flag = 0;
+
+        public PomodoroTag(DataMap map)
+        {
+            setDataMap(map);
+        }
+
+
+        public PomodoroTag(String _name,int _flag)
+        {
+            name = _name;
+            flag = _flag;
+        }
+
+        public String toString(){return name;}
+
+        public String getName(){return name;}
+        public void setName(String _name){name = _name;}
+
+        public boolean getIsEnableDefault(){
+            return (flag & FLAG_ENABLE_DEFAULT) != 0;
+        }
+
+        public void setIsEnableDefault(boolean isEnable)
+        {
+            if (isEnable)
+                flag |= FLAG_ENABLE_DEFAULT;
+            else
+                flag &= (~FLAG_ENABLE_DEFAULT);
+        }
+
+        public boolean getIsAutoEnableDescription(){
+            return (flag & FLAG_AUTO_ENABLE_BY_DESCRIPTION) != 0;
+        }
+
+        public void setIsAutoEnableDescription(boolean isEnable)
+        {
+            if (isEnable)
+                flag |= FLAG_AUTO_ENABLE_BY_DESCRIPTION;
+            else
+                flag &= (~FLAG_AUTO_ENABLE_BY_DESCRIPTION);
+        }
+
+        public DataMap toDataMap()
+        {
+            DataMap map = new DataMap();
+            map.putString(KEY_TOMATO_TAG_NAME,name);
+            map.putInt(KEY_TOMATO_TAG_FLAG,flag);
+            return map;
+        }
+
+        public boolean setDataMap(DataMap map)
+        {
+            if (map.containsKey(KEY_TOMATO_TAG_NAME))
+                name = map.getString(KEY_TOMATO_TAG_NAME,"");
+            else
+                return false;
+            if (map.containsKey(KEY_TOMATO_TAG_FLAG))
+                flag = map.getInt(KEY_TOMATO_TAG_FLAG,0);
+            else
+                return false;
+            return true;
+        }
     }
 }
