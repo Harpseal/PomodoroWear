@@ -710,6 +710,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
         public void drawTextCentred(Canvas canvas, Paint paint, String text, float cx, float cy) {
             paint.getTextBounds(text, 0, text.length(), textBounds);
+
+            //float lineHeight = paint.descent() - paint.ascent();
+            //canvas.drawText(text, cx, cy + lineHeight/2, paint);
+
             //canvas.drawText(text, cx - textBounds.exactCenterX(), cy - textBounds.exactCenterY(), paint);
             canvas.drawText(text, cx, cy - textBounds.exactCenterY(), paint);
             //Log.d(TAG,text + " @ " + cx + " x " + cy);
@@ -963,17 +967,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff,false);
                 //drawTickNumber(mCacheCanvas,centerX,centerY,centerX - 16,30,360,30,1,1,24, 0xffffffff);
 
-                drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 5, 0, 1, 0xffffffff,false);
+                drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 10, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 6, meterLengthSec, 90, 270, 90, -1, 0, 2, 0xffffffff);
 
                 drawTickLine(mCacheCanvas, timerX, timerY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, timerX, timerY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
-                drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff,false);
+                drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff, false);
                 //drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90,  0, 50,  14, 0xffffffff,false);
+                //drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90,  0, 50,  14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas,timerX, timerY,meterLengthSec,0,270,90,  0,15, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas,tomatoX, tomatoY,meterLengthSec,0,270,90,  0,15,  14, 0xffffffff,false);
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
@@ -991,7 +995,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff,false);
                 //drawTickNumber(mCacheCanvas,centerX,centerY,centerX - 16,30,360,30,1,1,24, 0xffffffff);
 
-                drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 5, 0, 1, 0xffffffff,false);
+                drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 10, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 6, meterLengthSec, 90, 270, 90, -1, 0, 2, 0xffffffff);
 
                 drawTickLine(mCacheCanvas, timerX, timerY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff,false);
@@ -1001,7 +1005,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 //drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90, 0, 50, 14, 0xffffffff,false);
+                //drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90, 0, 50, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas, timerX, timerY, meterLengthSec, 0, 270, 90, 0, 15, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas, tomatoX, tomatoY, meterLengthSec, 0, 270, 90, 0, 15, 14, 0xffffffff,false);
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
@@ -1206,26 +1210,55 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     }
 
                     //if (!mAmbient) {
-                        mInteractionTextPaint.setTextSize(20);
-                        mInteractionTextPaint.setColor(Color.GRAY);
-                        if (mBatteryPredictionHourLeft >= 0 && mBatteryPredictionHourLeft <= 99) {
-                            if (mBatteryPredictionHourLeft<1)
-                                drawTextCentred(tmpCanvas, mInteractionTextPaint,
-                                        String.format("%.0fmin", mBatteryPredictionHourLeft*60),
-                                        centerX,centerY + meterYShift + meterLengthSec/2 );
-                            else
-                                drawTextCentred(tmpCanvas, mInteractionTextPaint,
-                                        String.format("%.0fhr", mBatteryPredictionHourLeft),
-                                        centerX,centerY + meterYShift + meterLengthSec/2 );
+                    mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                    mInteractionTextPaint.setTextSize(14);
+                    mInteractionTextPaint.setColor(Color.WHITE);
+                    meterX = (float) Math.sin(batteryRot) * meterLengthSec;
+                    meterY = (float) -Math.cos(batteryRot) * meterLengthSec;
 
-                            mInteractionTextPaint.setTextSize(14);
-                            drawTextCentred(tmpCanvas, mInteractionTextPaint,
-                                    String.format("%.2f %.0fhr",batteryLevel/mBatteryPredictionHourLeft,mBatteryPredictionHourLeft/batteryLevel*100),
-                                    centerX,centerY + meterYShift + meterLengthSec/4);
+
+                    if (mBatteryPredictionHourLeft >= 0 && mBatteryPredictionHourLeft <= 99) {
+
+                        float totolHour = mBatteryPredictionHourLeft/batteryLevel*100.f;
+                        drawTextCentred(tmpCanvas, mInteractionTextPaint,
+                                totolHour<1 ? String.format("%.0fmin", totolHour*60) : String.format("%.0fhr", totolHour),
+                                centerX-meterLengthSec, centerY + meterYShift);
+                        if (batteryLevel>10)
+                            drawTextCentred(tmpCanvas, mInteractionTextPaint, totolHour<1?"0min":"0hr", centerX+meterLengthSec, centerY + meterYShift);
+                        else
+                        {
+                            mHandPaintMeter.setStrokeWidth(1);
+                            mHandPaintMeter.setColor(Color.WHITE);
+                            canvas.drawLine(
+                                    centerX+meterLengthSec-6, centerY + meterYShift,
+                                    centerX+meterLengthSec, centerY + meterYShift, mHandPaintMeter);
                         }
-                        else if (mBatteryPredictionHourLeft < 0)
-                            drawTextCentred(tmpCanvas, mInteractionTextPaint, "-- hr",centerX,centerY + meterYShift + meterLengthSec/2 );
-                    //}
+                        if (batteryLevel<=90)
+                            drawTextCentred(tmpCanvas, mInteractionTextPaint,
+                                    mBatteryPredictionHourLeft<1? String.format("%.0fmin", mBatteryPredictionHourLeft*60) : String.format("%.0fhr", mBatteryPredictionHourLeft),
+                                    centerX+meterX, centerY + meterYShift + meterY);
+
+//                        if (mBatteryPredictionHourLeft<1)
+//                            drawTextCentred(tmpCanvas, mInteractionTextPaint,
+//                                    String.format("%.0fmin", mBatteryPredictionHourLeft*60),
+//                                    centerX,centerY + meterYShift + meterLengthSec/2 );
+//                        else
+//                            drawTextCentred(tmpCanvas, mInteractionTextPaint,
+//                                    String.format("%.0fhr", mBatteryPredictionHourLeft),
+//                                    centerX,centerY + meterYShift + meterLengthSec/2 );
+//
+//                        mInteractionTextPaint.setTextSize(14);
+//                        drawTextCentred(tmpCanvas, mInteractionTextPaint,
+//                                String.format("%.2f %.0fhr",batteryLevel/mBatteryPredictionHourLeft,),
+//                                centerX,centerY + meterYShift + meterLengthSec/4);
+                    }
+                    else if (mBatteryPredictionHourLeft < 0) {
+                        drawTextCentred(tmpCanvas, mInteractionTextPaint, "100", centerX-meterLengthSec, centerY + meterYShift);
+                        drawTextCentred(tmpCanvas, mInteractionTextPaint, "0", centerX+meterLengthSec, centerY + meterYShift);
+                        if (batteryLevel<=90 && batteryLevel>=10)
+                            drawTextCentred(tmpCanvas, mInteractionTextPaint, "" + (int)batteryLevel, centerX+meterX, centerY + meterYShift + meterY);
+                    }
+                    mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
                     mBatteryPredictionCurrentLevel = batteryLevel;
                 }
 
@@ -1460,7 +1493,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             {
                 mUpdateFlag |= DRAW_MIN|DRAW_SEC;
                 mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
-                mVibrator.vibrate(new long[]{10, 100, 10, 100, 10, 100}, -1);
+                mVibrator.vibrate(new long[]{10, 500, 200, 500, 200, 500}, -1);
 //                new Thread(){
 //                    @Override
 //                    public void run()

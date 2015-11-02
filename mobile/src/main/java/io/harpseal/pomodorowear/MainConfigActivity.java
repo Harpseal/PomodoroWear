@@ -1,6 +1,7 @@
 package io.harpseal.pomodorowear;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -30,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TimePicker;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -146,13 +148,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefPomodoroTimerWork.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTomatoWork,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(false, mDataTomatoWork, 60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTomatoWork = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_WORK,mDataTomatoWork);
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTomatoWork = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoWork);
+                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
                                 mPrefPomodoroTimerWork.setSummary("" + mDataTomatoWork / 60 + " min");
+
                             }
                         });
                 return false;
@@ -162,13 +170,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefPomodoroTimerRelax.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTomatoRelax,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(false, mDataTomatoRelax, 60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTomatoRelax = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX,mDataTomatoRelax);
-                                mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax/60 + " min");
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTomatoRelax = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelax);
+                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
+                                mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax / 60 + " min");
+
                             }
                         });
                 return false;
@@ -178,13 +192,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefPomodoroTimerLongRelex.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTomatoRelaxLong,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(false, mDataTomatoRelaxLong, 60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTomatoRelaxLong = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX_LONG,mDataTomatoRelaxLong);
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTomatoRelaxLong = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelaxLong);
+                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTomatoRelaxLong);
                                 mPrefPomodoroTimerLongRelex.setSummary("" + mDataTomatoRelaxLong / 60 + " min");
+
                             }
                         });
                 return false;
@@ -194,15 +214,32 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer1.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTimer1,
-                        new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTimer1 = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
-                                mPrefTimer1.setSummary("" + mDataTimer1/60 + " min");
-                            }
-                        });
+//                showTimePickerDialog(mDataTimer1,
+//                        new TimePickerDialog.OnTimeSetListener() {
+//                            @Override
+//                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//                                mDataTimer1 = (hourOfDay*60 + minute)*60;
+//                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
+//                                mPrefTimer1.setSummary("" + mDataTimer1/60 + " min");
+//                            }
+//                        });
+//                return false;
+
+                displayMinutePickerDialog(true,mDataTimer1,12*60,
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+
+                        Dialog dialog  = (Dialog) dialogInterface;
+                        NumberPicker pickerHour = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_hour);
+                        NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
+                        mDataTimer1 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                        Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer1);
+                        sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
+                        mPrefTimer1.setSummary("" + mDataTimer1 / 60 + " min");
+
+                    }
+                });
                 return false;
             }
         });
@@ -210,13 +247,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer2.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTimer2,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(true,mDataTimer2,12*60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTimer2 = (hourOfDay*60 + minute)*60;
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog  = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTimer2 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer2);
                                 sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER2,mDataTimer2);
-                                mPrefTimer2.setSummary("" + mDataTimer2/60 + " min");
+                                mPrefTimer2.setSummary("" + mDataTimer2 / 60 + " min");
+
                             }
                         });
                 return false;
@@ -226,13 +269,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer3.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTimer3,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(true, mDataTimer3, 12 * 60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTimer3 = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER3,mDataTimer3);
-                                mPrefTimer3.setSummary("" + mDataTimer3/60 + " min");
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTimer3 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer3);
+                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER3, mDataTimer3);
+                                mPrefTimer3.setSummary("" + mDataTimer3 / 60 + " min");
+
                             }
                         });
                 return false;
@@ -242,13 +291,19 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer4.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                showTimePickerDialog(mDataTimer4,
-                        new TimePickerDialog.OnTimeSetListener() {
+                displayMinutePickerDialog(true, mDataTimer4, 12 * 60,
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                mDataTimer4 = (hourOfDay*60 + minute)*60;
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER4,mDataTimer4);
-                                mPrefTimer4.setSummary("" + mDataTimer4/60 + " min");
+                            public void onClick(DialogInterface dialogInterface, int which) {
+
+                                Dialog dialog = (Dialog) dialogInterface;
+                                NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
+                                NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                mDataTimer4 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer4);
+                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER4, mDataTimer4);
+                                mPrefTimer4.setSummary("" + mDataTimer1 / 60 + " min");
+
                             }
                         });
                 return false;
@@ -630,6 +685,67 @@ public class MainConfigActivity extends PreferenceActivity implements
         }
     }
 
+    private void displayMinutePickerDialog(boolean isShowHour,int secondCur,int minuteMax,DialogInterface.OnClickListener onOkLisenter)
+    {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainConfigActivity.this);
+        //builder.setTitle("Tag Editing");
+
+        LayoutInflater inflater = getLayoutInflater();
+        View viewNumPicker = inflater.inflate(R.layout.dialog_minute_picker, null);
+        final android.widget.NumberPicker pickerHour = (android.widget.NumberPicker)viewNumPicker.findViewById(R.id.dialog_number_picker_hour);
+        final android.widget.NumberPicker pickerMin = (android.widget.NumberPicker)viewNumPicker.findViewById(R.id.dialog_number_picker_min);
+        final android.widget.TextView textHour = (android.widget.TextView)viewNumPicker.findViewById(R.id.dialog_text_picker_hour);
+        final android.widget.TextView textMin = (android.widget.TextView)viewNumPicker.findViewById(R.id.dialog_text_picker_min);
+        pickerHour.setWrapSelectorWheel(true);
+        pickerMin.setWrapSelectorWheel(true);
+
+        pickerHour.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                //builder.setTitle("" + pickerHour.getValue() + " : " + pickerMin.getValue())
+            }
+        });
+
+        int minCur = secondCur/60;
+        if (isShowHour)
+        {
+            float hourMax = (float)Math.ceil((float)minuteMax/60.f);
+            pickerHour.setMaxValue((int)hourMax);
+            pickerHour.setMinValue(0);
+            pickerHour.setValue(minCur/60);
+
+            pickerMin.setMaxValue(59);
+            pickerMin.setMinValue(0);
+            pickerMin.setValue(minCur%60);
+
+            textMin.setVisibility(View.GONE);
+        }
+        else
+        {
+            pickerHour.setValue(0);
+            pickerHour.setVisibility(View.GONE);
+            textHour.setVisibility(View.GONE);
+
+            pickerMin.setMaxValue(minuteMax);
+            pickerMin.setMinValue(0);
+            pickerMin.setValue(minCur);
+        }
+
+        builder.setView(viewNumPicker);
+
+// Set up the buttons
+        builder.setPositiveButton("OK", onOkLisenter);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                //mTagAlertDialog.show();
+            }
+        });
+
+
+        builder.show();
+    }
     private void displayNoConnectedDeviceDialog() {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         String messageText = getResources().getString(R.string.title_no_device_connected);
