@@ -960,12 +960,30 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             if (mBackgroundBitmap == null)
             {
-                mBackgroundBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.RGB_565);
+                mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.face0_bg1);
+                float scale;
+                scale = (float)width/(float)mBackgroundBitmap.getWidth();
+                mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
+                        (int) ((float) mBackgroundBitmap.getWidth() * scale),
+                        (int) ((float) mBackgroundBitmap.getHeight() * scale), true);
+
+                //mBackgroundBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+
                 mCacheCanvas.setBitmap(mBackgroundBitmap);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 8, centerX, 0, 360, 6, -1, 0, 1, 0xffffffff,true);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 14, centerX, 0, 360, 30, 3, 0, 3, 0xffffffff,true);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff,false);
-                //drawTickNumber(mCacheCanvas,centerX,centerY,centerX - 16,30,360,30,1,1,24, 0xffffffff);
+//                mCacheCanvas.save();
+//                mCacheCanvas.scale(scale, scale);
+//                //mCacheCanvas.translate(-(512-320)/2,-(512-320)/2);
+//                mCacheCanvas.drawBitmap(bg, 0, 0, mBackgroundPaint);
+//                mCacheCanvas.restore();
+
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 8, centerX, 0, 360, 6, -1, 0, 1, 0xffffffff, true);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 14, centerX, 0, 360, 30, 3, 0, 3, 0xffffffff,false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff, false);
+
+                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 150, 30, 3, 1, 32, 0xffffffff, false);//3,4,5
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 210, 240, 30, 7, 1, 32, 0xffffffff, false);//7,8
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 300, 360, 30, 10, 1, 32, 0xffffffff, false);//10,11,12
 
                 drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 10, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 6, meterLengthSec, 90, 270, 90, -1, 0, 2, 0xffffffff);
@@ -976,7 +994,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff, false);
                 //drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
-                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
                 //drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90,  0, 50,  14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas,timerX, timerY,meterLengthSec,0,270,90,  0,15, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas,tomatoX, tomatoY,meterLengthSec,0,270,90,  0,15,  14, 0xffffffff,false);
@@ -990,10 +1007,14 @@ public class MainWatchFace extends CanvasWatchFaceService {
             if (mAmbient && mBackgroundBitmapAmbient == null) {
                 mBackgroundBitmapAmbient = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.RGB_565);
                 mCacheCanvas.setBitmap(mBackgroundBitmapAmbient);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 8, centerX, 0, 360, 6, -1, 0, 1, 0xffffffff,true);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 14, centerX, 0, 360, 30, 3, 0, 3, 0xffffffff,true);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff,false);
-                //drawTickNumber(mCacheCanvas,centerX,centerY,centerX - 16,30,360,30,1,1,24, 0xffffffff);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 8, centerX, 0, 360, 6, -1, 0, 1, 0xffffffff, true);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 14, centerX, 0, 360, 30, 3, 0, 3, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX, 0, 360, 90, -1, 0, 5, 0xffffffff, false);
+
+                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 150, 30, 3, 1, 32, 0xffffffff, false);//3,4,5
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 210, 240, 30, 7, 1, 32, 0xffffffff, false);//7,8
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 300, 360, 30, 10, 1, 32, 0xffffffff, false);//10,11,12
 
                 drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 4, meterLengthSec, 90, 270, 18, 10, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec - 6, meterLengthSec, 90, 270, 90, -1, 0, 2, 0xffffffff);
@@ -1001,10 +1022,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, timerX, timerY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff,false);
                 //drawTickLine(mCacheCanvas, timerX, timerY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
-                drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff,false);
+                drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 4, meterLengthSec, 0, 360, 30, 3, 0, 1, 0xffffffff, false);
                 //drawTickLine(mCacheCanvas, tomatoX, tomatoY, meterLengthSec - 6, meterLengthSec, 0, 360, 90, -1, 0, 2, 0xffffffff);
 
-                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
                 //drawTickNumber(mCacheCanvas, centerX, centerY + meterYShift, meterLengthSec, 90, 270, 90, 0, 50, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas, timerX, timerY, meterLengthSec, 0, 270, 90, 0, 15, 14, 0xffffffff,false);
                 drawTickNumber(mCacheCanvas, tomatoX, tomatoY, meterLengthSec, 0, 270, 90, 0, 15, 14, 0xffffffff,false);
@@ -1180,12 +1201,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
                             (float) batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)*100.f;
                     //int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                     float batteryRot = batteryLevel/100.f*(float) Math.PI + (float) Math.PI /2.f;
-                    mHandPaintMeter.setColor(0xffff4040);
-                    meterX = (float) Math.sin(batteryRot) * meterLength;
-                    meterY = (float) -Math.cos(batteryRot) * meterLength;
-
-                    tmpCanvas.drawLine(centerX, centerY + meterYShift, centerX + meterX, centerY + meterY + meterYShift, mHandPaintMeter);
-                    tmpCanvas.drawCircle(centerX, centerY + meterYShift, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
 
                     if (mBatteryPredictionStartTime == 0 || mBatteryPredictionStartLevel < 0 || mBatteryPredictionCurrentLevel<batteryLevel-1)
                     {
@@ -1260,6 +1275,14 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     }
                     mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
                     mBatteryPredictionCurrentLevel = batteryLevel;
+
+
+                    mHandPaintMeter.setColor(0xffff4040);
+                    meterX = (float) Math.sin(batteryRot) * meterLength;
+                    meterY = (float) -Math.cos(batteryRot) * meterLength;
+
+                    tmpCanvas.drawLine(centerX, centerY + meterYShift, centerX + meterX, centerY + meterY + meterYShift, mHandPaintMeter);
+                    tmpCanvas.drawCircle(centerX, centerY + meterYShift, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
                 }
 
 
@@ -1275,6 +1298,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     float hrX = (float) Math.sin(hrRot) * hrLength;
                     float hrY = (float) -Math.cos(hrRot) * hrLength;
                     tmpCanvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaintHour);
+
                 }
 
                 if (!mAmbient && mBitmapMin!=null)
@@ -1297,6 +1321,24 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mHandPaintMin.setColor(0xffffffff);
                     mHandPaintMin.setStrokeWidth(strockMin);
                     tmpCanvas.drawLine(centerX, centerY, centerX + minX, centerY + minY, mHandPaintMin);
+
+
+                    mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+                    mInteractionTextPaint.setTextSize(20);
+                    mInteractionTextPaint.setColor(Color.BLACK);
+                    tmpCanvas.save();
+                    if (hours % 12 >= 6) {
+                        tmpCanvas.rotate(hrRot * 180.f / (float) Math.PI + 90, centerX, centerY);
+                        drawTextCentred(tmpCanvas, mInteractionTextPaint, String.format("%02d:%02d", hours, minutes), centerX - hrLength / 2 - mHandPaintHour.getStrokeWidth(), centerY);
+                    }
+                    else
+                    {
+                        tmpCanvas.rotate(hrRot * 180.f / (float) Math.PI - 90, centerX, centerY);
+                        drawTextCentred(tmpCanvas, mInteractionTextPaint, String.format("%02d:%02d", hours, minutes), centerX + hrLength / 2 + mHandPaintHour.getStrokeWidth(), centerY);
+                    }
+                    Log.d(TAG, String.format("%02d:%02d", hours, minutes));
+                    tmpCanvas.restore();
+                    mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
                 }
 
 
