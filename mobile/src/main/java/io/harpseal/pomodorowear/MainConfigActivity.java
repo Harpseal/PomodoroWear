@@ -302,7 +302,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 mDataTimer4 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer4);
                                 sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER4, mDataTimer4);
-                                mPrefTimer4.setSummary("" + mDataTimer1 / 60 + " min");
+                                mPrefTimer4.setSummary("" + mDataTimer4 / 60 + " min");
 
                             }
                         });
