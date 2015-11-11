@@ -960,7 +960,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             if (mBackgroundBitmap == null)
             {
-                mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.face0_bg1);
+                mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.face0_bg2);
                 float scale;
                 scale = (float)width/(float)mBackgroundBitmap.getWidth();
                 mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
