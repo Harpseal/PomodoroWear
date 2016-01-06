@@ -999,15 +999,15 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 mCacheCanvas.drawCircle(timerX, timerY, meterLengthSec, paint);
                 mCacheCanvas.drawCircle(tomatoX,tomatoY,meterLengthSec,paint);
 
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, -1, 0, 1, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 8, 0, 360, 6, -1, 0, 1, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 3, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, 2, 0, 1, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX - 8, 0, 360, 6, 5, 0, 1, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 4, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, 0, 360, 90, -1, 0, 8, 0xffffff00, false);
 
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF , Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
                 mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 30, 60, 30, 1, 1, 30, 0xffffffff, false);//1,2
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 120, 150, 30, 4, 1, 30, 0xffffffff, false);//4,5
@@ -1035,14 +1035,14 @@ public class MainWatchFace extends CanvasWatchFaceService {
             if (mAmbient && mBackgroundBitmapAmbient == null) {
                 mBackgroundBitmapAmbient = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.RGB_565);
                 mCacheCanvas.setBitmap(mBackgroundBitmapAmbient);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, -1, 0, 1, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 8, 0, 360, 6, -1, 0, 1, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 3, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, 2, 0, 1, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX - 8, 0, 360, 6, 5, 0, 1, 0xffffffff, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 4, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, 0, 360, 90, -1, 0, 8, 0xffffff00, false);
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
                 mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 30, 60, 30, 1, 1, 30, 0xffffffff, false);//1,2
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 120, 150, 30, 4, 1, 30, 0xffffffff, false);//4,5
