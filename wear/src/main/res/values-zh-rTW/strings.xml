@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">PomodoroWear</string>
+    <string name="my_analog_name">Pomodoro Analog</string>
+    <string name="pomodoro_config_name">Pomodoro Wear設定</string>
+    <string name="pomodoro_config_title">設定</string>
+
+    <string name="tomato_builder_title">新建事件</string>
+    <string name="tomato_builder_preview">事件標題預覽</string>
+
+
+    <string name="config_item_lv1_calendar">日曆</string>
+    <string name="config_item_lv1_tomato">Pomodoro</string>
+    <string name="config_item_lv1_timer">計時器</string>
+    <string name="config_item_lv1_clear_event_queue">事件佇列</string>
+
+
+
+    <string-array name="config_array_lv1">
+        <item>@string/config_item_lv1_calendar</item>
+        <item>@string/config_item_lv1_tomato</item>
+        <item>@string/config_item_lv1_timer</item>
+        <item>@string/config_item_lv1_clear_event_queue</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_timer1">計時器1</string>
+    <string name="config_item_lv2_timer2">計時器2</string>
+    <string name="config_item_lv2_timer3">計時器3</string>
+    <string name="config_item_lv2_timer4">計時器4</string>
+
+    <string-array name="config_array_lv2_timer">
+        <item>@string/config_item_lv2_timer1</item>
+        <item>@string/config_item_lv2_timer2</item>
+        <item>@string/config_item_lv2_timer3</item>
+        <item>@string/config_item_lv2_timer4</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_tomato_work">工作</string>
+    <string name="config_item_lv2_tomato_relax">休息</string>
+    <string name="config_item_lv2_tomato_relax_long">長休息</string>
+
+    <string-array name="config_array_lv2_tomato">
+        <item>@string/config_item_lv2_tomato_work</item>
+        <item>@string/config_item_lv2_tomato_relax</item>
+        <item>@string/config_item_lv2_tomato_relax_long</item>
+    </string-array>
+
+
+    <string name="config_item_lv2_calendar_msg">讀取日曆中...</string>
+
+    <string-array name="config_array_lv2_calendar">
+        <item>@string/config_item_lv2_calendar_msg</item>
+    </string-array>
+    <string name="face_msg_start_to_work">開始工作!</string>
+    <string name="face_msg_cancel">返回</string>
+    <string name="face_msg_idle">取消</string>
+    <string name="face_msg_reset_work_timer">重設工作時間</string>
+    <string name="face_msg_long_relax">長休息</string>
+    <string name="face_msg_relax">休息</string>
+    <string name="face_msg_profile_1">設定1</string>
+    <string name="face_msg_profile_2">設定2</string>
+    <string name="face_msg_profile_3">設定3</string>
+    <string name="face_msg_profile_4">設定4</string>
+    <string name="face_msg_short_minute">分鐘</string>
+    <string name="face_msg_reset">重設</string>
+    <string name="config_item_lv1_no_event">無未送出事件</string>
+    <string name="config_item_lv1_one_event">一個未送出事件</string>
+    <string name="config_item_lv1_event_in_eqeue">個未送出事件</string>
+    <string name="pomodoro_msg_short_minute">分鐘</string>
+
+</resources>

@@ -3,9 +3,12 @@ package io.harpseal.pomodorowear;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.provider.CalendarContract;
 import android.util.Log;
 import android.widget.Toast;
@@ -58,6 +61,13 @@ public class MessageListenerService extends WearableListenerService {
                 else if (key == WatchFaceUtil.MSG_TYPE_BATTERY)
                 {
                     Log.d(TAG,"MSG_TYPE_BATTERY");
+                    new Thread(){
+                        @Override
+                        public void run()
+                        {
+                            uploadPhoneBattery(MessageListenerService.this);
+                        }
+                    }.start();
                 }
                 else if (key == WatchFaceUtil.MSG_TYPE_UPDATE_CALENDAR_LIST)
                 {
@@ -278,6 +288,53 @@ public class MessageListenerService extends WearableListenerService {
                     }
 
                 }
+            }
+
+        }
+    }
+
+
+    public static void uploadPhoneBattery(Context context)
+    {
+
+        String nodeId;
+        GoogleApiClient client;
+        client = new GoogleApiClient.Builder(context)
+                //.addConnectionCallbacks(this)
+                //.addOnConnectionFailedListener(this)
+                .addApi(Wearable.API)
+                .build();
+
+        if (!client.isConnected()) {
+            ConnectionResult connRes = client.blockingConnect(1000, TimeUnit.MILLISECONDS);
+            if (!connRes.isSuccess())
+            {
+                Log.e("uploadPhoneBattery","Can't connect to GoogleApiClient...");
+                return;
+            }
+
+        }
+        NodeApi.GetConnectedNodesResult result =
+                Wearable.NodeApi.getConnectedNodes(client).await();
+
+        List<Node> nodes = result.getNodes();
+        //for (Node n : nodes)
+        //    Log.d(TAG,"Node " + n.getId() + "  " + n.getDisplayName());
+        if (nodes.size() > 0) {
+
+            nodeId = nodes.get(0).getId();
+
+            Intent batteryStatus = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            if (batteryStatus != null) {
+                int batteryLevel = (int) ((float) batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) /
+                        (float) batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1) * 100.f);
+
+                DataMap calMap = new DataMap();
+                calMap.putInt(WatchFaceUtil.KEY_TOMATO_PHONE_BATTERY, batteryLevel);
+                byte[] rawData = calMap.toByteArray();
+                Wearable.MessageApi.sendMessage(client, nodeId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+
+                Log.d("uploadCalendarList", "Sent watch face config message: " + WatchFaceUtil.KEY_TOMATO_PHONE_BATTERY + " Battery : " + batteryLevel);
             }
 
         }

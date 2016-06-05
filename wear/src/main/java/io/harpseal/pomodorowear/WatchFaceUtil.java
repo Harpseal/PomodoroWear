@@ -59,6 +59,7 @@ public final class WatchFaceUtil {
     public static final String KEY_TOMATO_CALENDAR_ACCOUNT_NAME = "KEY_TOMATO_CALENDAR_ACCOUNT_NAME";//string
     //public static final String KEY_TOMATO_CALENDAR_ACCOUNT_LIST = "KEY_TOMATO_CALENDAR_ACCOUNT_NAME";//string[]
 
+    public static final String KEY_TOMATO_PHONE_BATTERY = "KEY_TOMATO_PHONE_BATTERY";//int
 
     public enum WatchControlState
     {
@@ -68,20 +69,24 @@ public final class WatchFaceUtil {
     }
 
 
-    public static final int DEFAULT_TOMATO_WORK = 25*60;
+    public static final int DEFAULT_TOMATO_WORK = 30*60;
     public static final int DEFAULT_TOMATO_RELAX = 5*60;
     public static final int DEFAULT_TOMATO_RELAX_LONG = 10*60;
 
-    public static final int DEFAULT_TIMER1 = 0*60;
-    public static final int DEFAULT_TIMER2 = 15*60;
+    public static final int DEFAULT_TIMER1 = 15*60;
+    public static final int DEFAULT_TIMER2 = 0*60;
     public static final int DEFAULT_TIMER3 = 30*60;
-    public static final int DEFAULT_TIMER4 = 45*60;
+    public static final int DEFAULT_TIMER4 = 40*60;
     public static final long DEFAULT_TIMER_ZERO = 0;
 
     public static final String DEFAULT_TOMATO_TYPE = KEY_TOMATO_IDLE;
     public static final long DEFAULT_TOMATO_DATE = 0;
 
-    public static final String[] DEFAULT_TOMATO_TAGS = {/*"[30]","[N]",*/" Coding"," Doc","Other"};
+    public static final int DEFAULT_TOMATO_PHONE_BATTERY = -100;
+    public static final int DEFAULT_TOMATO_PHONE_BATTERY_WAIT_SHORT = 5*60*1000;
+    public static final int DEFAULT_TOMATO_PHONE_BATTERY_WAIT_LONG = 15*60*1000;
+
+    public static final String[] DEFAULT_TOMATO_TAGS = {/*"[30]","[N]",*/" Coding"," Doc"," Sport"};
     //public static final String[] DEFAULT_TOMATO_EVENTS = {};
 
     public static final int TIME_PICKER_REQUEST_CODE_TIMER = 1234;

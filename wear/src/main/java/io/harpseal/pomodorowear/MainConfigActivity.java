@@ -36,6 +36,7 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainConfigActivity extends Activity implements
         WearableListView.ClickListener, WearableListView.OnScrollListener,
@@ -441,11 +442,15 @@ public class MainConfigActivity extends Activity implements
                 {
                     String subTitle = "";
                     if (mTomatoEventQueue==null || mTomatoEventQueue.size()==0)
-                        subTitle = "No event in queue";
+                        subTitle = getResources().getString(R.string.config_item_lv1_no_event);
                     else if (mTomatoEventQueue.size() == 1)
-                        subTitle = "Only one event in queue";
-                    else
-                        subTitle = "" + mTomatoEventQueue.size() + " events in queue";
+                        subTitle = getResources().getString(R.string.config_item_lv1_one_event);
+                    else {
+                        //if (Locale.getDefault().getLanguage().equals("zh"))
+                        //    ;
+                        //else
+                        subTitle = "" + mTomatoEventQueue.size() + " " + getResources().getString(R.string.config_item_lv1_event_in_eqeue);
+                    }
                     configItemViewHolder.mConfigItem.setSubLebelName(subTitle);
                 }
             }
@@ -456,24 +461,24 @@ public class MainConfigActivity extends Activity implements
                 if (!mIsInititalized)
                     configItemViewHolder.mConfigItem.setItemName("");
                 else if (position == 0)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer1/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer1/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 else if (position == 1)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer2/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer2/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 else if (position == 2)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer3/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer3/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 else if (position == 3)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer4/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTimer4/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 configItemViewHolder.mConfigItem.setSubLebelName(itemName);
             }
             else if (mConfigType == ConfigType.CT_Tomato) {
                 if (!mIsInititalized)
                     configItemViewHolder.mConfigItem.setItemName("");
                 else if (position == 0)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoWork/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoWork/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 else if (position == 1)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoRelax/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoRelax/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 else if (position == 2)
-                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoRelaxLong/60 + " min");
+                    configItemViewHolder.mConfigItem.setItemName("" + mDataTomatoRelaxLong/60 + " " + getResources().getString(R.string.pomodoro_msg_short_minute));
                 configItemViewHolder.mConfigItem.setSubLebelName(itemName);
             }
 

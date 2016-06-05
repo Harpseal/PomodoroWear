@@ -8,7 +8,7 @@
 
     <dimen name="analog_hand_meter_sec">1dp</dimen>
     <dimen name="analog_hand_meter_min">3dp</dimen>
-    <dimen name="analog_hand_meter_hour">6dp</dimen>
+    <dimen name="analog_hand_meter_hour">5dp</dimen>
 
     <dimen name="interactive_x_offset">15dp</dimen>
     <dimen name="interactive_x_offset_round">25dp</dimen>

@@ -52,5 +52,21 @@
     <string-array name="config_array_lv2_calendar">
         <item>@string/config_item_lv2_calendar_msg</item>
     </string-array>
+    <string name="face_msg_start_to_work">Start to work!</string>
+    <string name="face_msg_cancel">Back</string>
+    <string name="face_msg_idle">Clear</string>
+    <string name="face_msg_reset_work_timer">Reset work timer</string>
+    <string name="face_msg_long_relax">Long relax!</string>
+    <string name="face_msg_relax">Relax</string>
+    <string name="face_msg_profile_1">Profile 1</string>
+    <string name="face_msg_profile_2">Profile 2</string>
+    <string name="face_msg_profile_3">Profile 3</string>
+    <string name="face_msg_profile_4">Profile 4</string>
+    <string name="face_msg_short_minute">min</string>
+    <string name="face_msg_reset">Reset</string>
+    <string name="config_item_lv1_no_event">No event in queue</string>
+    <string name="config_item_lv1_one_event">Only one event in queue</string>
+    <string name="config_item_lv1_event_in_eqeue">events in queue</string>
+    <string name="pomodoro_msg_short_minute">min</string>
 
 </resources>

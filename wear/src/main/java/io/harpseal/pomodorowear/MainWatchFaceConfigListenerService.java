@@ -49,16 +49,19 @@ public class MainWatchFaceConfigListenerService extends WearableListenerService
     
     @Override // WearableListenerService
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.d(TAG,"onMessageReceived");
+
         if (messageEvent.getPath().equals(WatchFaceUtil.PATH_WITH_MESSAGE)) {
             //intent.putExtra("Message", new String(messageEvent.getData()));
             intent.putExtra("MessageDataMap", messageEvent.getData());
             sendBroadcast(intent);
+            Log.d(TAG,"onMessageReceived + sendBroadcast");
             return;
         }
         else if (!messageEvent.getPath().equals(WatchFaceUtil.PATH_WITH_FEATURE)) {
+            Log.d(TAG,"onMessageReceived + PATH_WITH_FEATURE");
             return;
         }
+
         byte[] rawData = messageEvent.getData();
         // It's allowed that the message carries only some of the keys used in the config DataItem
         // and skips the ones that we don't want to change.
@@ -67,6 +70,18 @@ public class MainWatchFaceConfigListenerService extends WearableListenerService
             Log.d(TAG, "Received watch face config message: " + configKeysToOverwrite);
         }
 
+        for (String configKey : configKeysToOverwrite.keySet()) {
+            if (configKey.equals(WatchFaceUtil.KEY_TOMATO_PHONE_BATTERY)) {
+                //int newValue  = configKeysToOverwrite.getInt(configKey);
+                intent.putExtra("MessageDataMap", messageEvent.getData());
+                sendBroadcast(intent);
+                Log.d(TAG,"onMessageReceived + overwriteKeysInConfigDataMap force MessageDataMap");
+                return;
+                //return;
+            }
+        }
+
+        Log.d(TAG,"onMessageReceived + overwriteKeysInConfigDataMap :" +configKeysToOverwrite.toString());
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this).addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this).addApi(Wearable.API).build();
@@ -85,23 +100,23 @@ public class MainWatchFaceConfigListenerService extends WearableListenerService
 
     @Override // GoogleApiClient.ConnectionCallbacks
     public void onConnected(Bundle connectionHint) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnected: " + connectionHint);
-        }
+        //if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "WearableListenerService onConnected: " + connectionHint);
+        //}
     }
 
     @Override  // GoogleApiClient.ConnectionCallbacks
     public void onConnectionSuspended(int cause) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnectionSuspended: " + cause);
-        }
+        //if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "WearableListenerService onConnectionSuspended: " + cause);
+        //}
     }
 
     @Override  // GoogleApiClient.OnConnectionFailedListener
     public void onConnectionFailed(ConnectionResult result) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "onConnectionFailed: " + result);
-        }
+        //if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "WearableListenerService onConnectionFailed: " + result);
+        //}
     }
 
 }
