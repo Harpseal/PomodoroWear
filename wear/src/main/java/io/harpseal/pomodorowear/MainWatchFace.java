@@ -33,6 +33,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -166,7 +167,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mCacheLastUpeateMin = -1;//force to refresh
         mPhoneBattery = battery;
         mPhoneBatteryLastUpdateTime = System.currentTimeMillis();
-        mPhoneBatteryRetryLeft = 0;
+        mPhoneBatteryRetryLeft = mPhoneBattery<0?4:0;
     }
 
     private String mTomatoType = WatchFaceUtil.DEFAULT_TOMATO_TYPE;
@@ -229,6 +230,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
         float mHandWidthMeterMin;
         float mHandWidthMeterHour;
         boolean mAmbient;
+        boolean mSimpleAmbient;
         //Time mTime;
 
         private long mClockBase = 0;
@@ -386,6 +388,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mTimeZone = TimeZone.getDefault();
             updateClock(mTimeZone);
             mBatteryPredictionStartTime = System.currentTimeMillis();
+
+
+            mSimpleAmbient = (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
+            // = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
             //mTime = new Time();
         }
 
@@ -812,7 +818,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             Paint paint = new Paint();
             paint.setColor(strokeColor);
             paint.setStrokeWidth(strokeWidth);
-            paint.setAntiAlias(!mAmbient);
+            paint.setAntiAlias(!mLowBitAmbient);
             if (mAmbient)
                 paint.setStrokeCap(Paint.Cap.SQUARE );
             else
@@ -869,14 +875,14 @@ public class MainWatchFace extends CanvasWatchFaceService {
             if (timeMS == Long.MAX_VALUE)
             {
                 if ((drawFlag & DRAW_HOUR)!=0) {
-                    if (mBitmapMeterCenter != null && !mAmbient)
-                    {
-                        canvas.drawBitmap(mBitmapMeterCenter,centerX-mBitmapMeterCenter.getWidth()/2, centerY-mBitmapMeterCenter.getWidth()/2, mBackgroundPaint);
-                    }
-                    else {
+
+                    if ((mAmbient && mSimpleAmbient) || mBitmapMeterCenter == null) {
                         mHandPaintMeter.setColor(Color.GRAY);
                         canvas.drawCircle(centerX, centerY, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
                         //canvas.drawLine(centerX, centerY, centerX, centerY - meterLenMin, mHandPaintMeter);
+                    }
+                    else {
+                        canvas.drawBitmap(mBitmapMeterCenter, centerX - mBitmapMeterCenter.getWidth() / 2 - 1, centerY - mBitmapMeterCenter.getWidth() / 2 - 1, mBackgroundPaint);
                     }
                 }
             }
@@ -933,12 +939,11 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     canvas.drawLine(
                             centerX, centerY,
                             centerX + meterX, centerY + meterY, mHandPaintMeter);
-                    if (mBitmapMeterCenter != null && !mAmbient){
-                        canvas.drawBitmap(mBitmapMeterCenter,centerX-mBitmapMeterCenter.getWidth()/2, centerY-mBitmapMeterCenter.getWidth()/2, mBackgroundPaint);
-                    }
-                    else {
+
+                    if ((mAmbient && mSimpleAmbient) || mBitmapMeterCenter == null)
                         canvas.drawCircle(centerX, centerY, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
-                    }
+                    else
+                        canvas.drawBitmap(mBitmapMeterCenter,centerX-mBitmapMeterCenter.getWidth()/2-1, centerY-mBitmapMeterCenter.getWidth()/2-1, mBackgroundPaint);
                 }
 
                 if ((drawFlag & DRAW_SEC)!=0 && !mAmbient) {
@@ -1226,7 +1231,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                 drawMeter(tmpCanvas, DRAW_HOUR, mTimerMS,timerX,timerY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,mDataTimerDateStart == mDataTimerDateEnd?0xff00b000:0xffE30300);
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,0xffE3B200);
+                    drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,Color.YELLOW);
                 else
                     drawMeter(tmpCanvas,DRAW_HOUR,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,0xffE30300);
             }
@@ -1237,11 +1242,13 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 canvas.drawBitmap(mCacheBitmapAmbientHour, 0, 0, mBackgroundPaint);
             else {
                 canvas.drawBitmap(mCacheBitmapHour, 0, 0, mBackgroundPaint);
-                drawMeter(canvas, DRAW_SEC, mTimerMS, timerX, timerY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, mDataTimerDateStart == mDataTimerDateEnd ? 0xff00b000 : 0xffE30300);
-                if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, 0xffE3B200);
-                else
-                    drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, Color.GRAY, 0xffE30300);
+                if (!mAmbient) {
+                    drawMeter(canvas, DRAW_SEC, mTimerMS, timerX, timerY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, mDataTimerDateStart == mDataTimerDateEnd ? 0xff00b000 : 0xffE30300);
+                    if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
+                        drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, 0xffE3B200);
+                    else
+                        drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, Color.GRAY, 0xffE30300);
+                }
             }
 
 
@@ -1393,15 +1400,18 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                     tmpCanvas.drawLine(centerX, centerY + meterYShift, centerX + meterX, centerY + meterY + meterYShift, mHandPaintMeter);
 
-                    if (mBitmapMeterCenter != null && !mAmbient)
+                    if ((mAmbient && mSimpleAmbient) || mBitmapMeterCenter == null )
+                        tmpCanvas.drawCircle(centerX, centerY + meterYShift, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
+                    else
                     {
                         tmpCanvas.drawBitmap(mBitmapMeterCenter,centerX-mBitmapMeterCenter.getWidth()/2, centerY + meterYShift-mBitmapMeterCenter.getWidth()/2, mBackgroundPaint);
                     }
-                    else
-                        tmpCanvas.drawCircle(centerX, centerY + meterYShift, mHandPaintMeter.getStrokeWidth() * 1.5f, mHandPaintMeter);
 
 
-                    if ( mPhoneBatteryRetryLeft != 0 && curTimeMS > mPhoneBatteryLastUpdateTime + WatchFaceUtil.DEFAULT_TOMATO_PHONE_BATTERY_WAIT_SHORT)//15 min 15*60*1000
+
+
+                    if ( mPhoneBatteryRetryLeft != 0 &&
+                            (mPhoneBatteryLastUpdateTime == 0 || curTimeMS > mPhoneBatteryLastUpdateTime + WatchFaceUtil.DEFAULT_TOMATO_PHONE_BATTERY_WAIT_SHORT))//15 min 15*60*1000
                     {
                         DataMap eventMsgMap = new DataMap();
                         eventMsgMap.putLong(WatchFaceUtil.MSG_ID_KEY, curTimeMS);
@@ -1426,8 +1436,13 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 }
 
 
-
-                if (!mAmbient && mBitmapHour!=null)
+                if ((mAmbient && mSimpleAmbient) || mBitmapHour == null)
+                {
+                    float hrX = (float) Math.sin(hrRot) * hrLength;
+                    float hrY = (float) -Math.cos(hrRot) * hrLength;
+                    tmpCanvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaintHour);
+                }
+                else
                 {
                     Matrix matrix = new Matrix();
                     matrix.setRotate(hrRotDeg, mBitmapHour.getWidth() / 2, mBitmapHour.getHeight() / 2);
@@ -1435,24 +1450,9 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     //matrix.setTranslate(width / 2 - mBitmapHour.getWidth() / 2, 0);
                     tmpCanvas.drawBitmap(mBitmapHour, matrix, mBackgroundPaint);
                 }
-                else
-                {
-                    float hrX = (float) Math.sin(hrRot) * hrLength;
-                    float hrY = (float) -Math.cos(hrRot) * hrLength;
-                    tmpCanvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHandPaintHour);
 
-                }
 
-                if (!mAmbient && mBitmapMin!=null)
-                {
-                    Matrix matrix = new Matrix();
-
-                    matrix.setRotate(minRotDeg, mBitmapMin.getWidth() / 2, mBitmapMin.getHeight() / 2);
-                    matrix.postTranslate(width / 2 - mBitmapMin.getWidth() / 2, 0);
-                    //matrix.preTranslate(width / 2 - mBitmapMin.getWidth() / 2, width / 2 - mBitmapMin.getWidth() / 2);
-                    tmpCanvas.drawBitmap(mBitmapMin, matrix, mBackgroundPaint);
-                }
-                else {
+                if ((mAmbient && mSimpleAmbient) || mBitmapMin==null) {
                     float minX = (float) Math.sin(minRot) * minLength;
                     float minY = (float) -Math.cos(minRot) * minLength;
 
@@ -1482,6 +1482,15 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     Log.d(TAG, String.format("%02d:%02d", hours, minutes));
                     tmpCanvas.restore();
                     mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+                }
+                else
+                {
+                    Matrix matrix = new Matrix();
+
+                    matrix.setRotate(minRotDeg, mBitmapMin.getWidth() / 2, mBitmapMin.getHeight() / 2);
+                    matrix.postTranslate(width / 2 - mBitmapMin.getWidth() / 2, 0);
+                    //matrix.preTranslate(width / 2 - mBitmapMin.getWidth() / 2, width / 2 - mBitmapMin.getWidth() / 2);
+                    tmpCanvas.drawBitmap(mBitmapMin, matrix, mBackgroundPaint);
                 }
 
 
@@ -1807,9 +1816,6 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     WatchFaceUtil.DEFAULT_TIMER_ZERO);
             addIntKeyIfMissingLong(config, WatchFaceUtil.KEY_TOMATO_DATE_END,
                     WatchFaceUtil.DEFAULT_TIMER_ZERO);
-
-            addIntKeyIfMissingInt(config, WatchFaceUtil.KEY_TOMATO_PHONE_BATTERY,
-                    WatchFaceUtil.DEFAULT_TOMATO_PHONE_BATTERY);
 
             if (!config.containsKey(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST)) {
                 DataMap eventMsgMap = new DataMap();

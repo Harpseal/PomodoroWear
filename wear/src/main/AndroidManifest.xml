@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.harpseal.pomodorowear"
-    android:versionCode="248"
-    android:versionName="1.0.0.248">
+    android:versionCode="279"
+    android:versionName="1.0.0.279">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -43,6 +43,9 @@
                 android:value="io.harpseal.pomodorowear.CONFIG_CALENDAR" />
 
             <intent-filter>
+                <!--action android:name="android.intent.action.MAIN" /-->
+                <!--category android:name="android.intent.category.LAUNCHER" /-->
+
                 <action android:name="android.service.wallpaper.WallpaperService" />
 
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />

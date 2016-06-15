@@ -82,7 +82,7 @@ public final class WatchFaceUtil {
     public static final String DEFAULT_TOMATO_TYPE = KEY_TOMATO_IDLE;
     public static final long DEFAULT_TOMATO_DATE = 0;
 
-    public static final int DEFAULT_TOMATO_PHONE_BATTERY = -100;
+    //public static final int DEFAULT_TOMATO_PHONE_BATTERY = -100;
     public static final int DEFAULT_TOMATO_PHONE_BATTERY_WAIT_SHORT = 5*60*1000;
     public static final int DEFAULT_TOMATO_PHONE_BATTERY_WAIT_LONG = 15*60*1000;
 

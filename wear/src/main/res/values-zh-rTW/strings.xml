@@ -54,7 +54,7 @@
     </string-array>
     <string name="face_msg_start_to_work">開始工作!</string>
     <string name="face_msg_cancel">返回</string>
-    <string name="face_msg_idle">取消</string>
+    <string name="face_msg_idle">結束</string>
     <string name="face_msg_reset_work_timer">重設工作時間</string>
     <string name="face_msg_long_relax">長休息</string>
     <string name="face_msg_relax">休息</string>

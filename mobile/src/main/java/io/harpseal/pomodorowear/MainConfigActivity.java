@@ -1,5 +1,6 @@
 package io.harpseal.pomodorowear;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -20,6 +21,8 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.provider.CalendarContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.wearable.companion.WatchFaceCompanion;
 import android.text.InputType;
@@ -33,6 +36,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -99,6 +103,8 @@ public class MainConfigActivity extends PreferenceActivity implements
         }
 
     }
+
+    private boolean mCalenderListUpdated = false;
     private static final ArrayList<CalendarItem> mCalendarList = new ArrayList<CalendarItem>();
     private int mSelectedCalendarListIdx = -1;
     private long mSelectedCalendarID = -1;
@@ -468,6 +474,11 @@ public class MainConfigActivity extends PreferenceActivity implements
 
     private void showCalendarPickerDialog()
     {
+        if (!mCalenderListUpdated)
+        {
+            updateCalendarListWrapper();
+            return;
+        }
         String[] calNameArray = new String[mCalendarList.size()];
         int c=0;
         for (CalendarItem item : mCalendarList)
@@ -493,6 +504,8 @@ public class MainConfigActivity extends PreferenceActivity implements
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        updateCalendarListWrapper();
+        Log.d(TAG,"onStart....");
     }
 
     @Override
@@ -501,6 +514,12 @@ public class MainConfigActivity extends PreferenceActivity implements
             mGoogleApiClient.disconnect();
         }
         super.onStop();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
     }
 
     final static int MSG_SHOW_NO_PEER_DIALOG = 100;
@@ -549,6 +568,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                         mHandler.sendEmptyMessage(MSG_SHOW_NO_PEER_DIALOG);
                         //displayNoConnectedDeviceDialog();
                     }
+
                 }
             }).start();
 
@@ -662,7 +682,7 @@ public class MainConfigActivity extends PreferenceActivity implements
 
             //updateConfigDataItemAndUiOnStartup();
             Log.d(TAG, "onResult 1");
-            updateCalendarList();
+            //if (!mCalenderListUpdated) updateCalendarListWrapper();
             //setUpAllPickers(config);
         } else {
             // If DataItem with the current config can't be retrieved, select the default items on
@@ -754,8 +774,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                 .setCancelable(false)
                 .setPositiveButton(okText, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //updateCalendarList();
-                        finish();
+                        //updateCalendarListWrapper();
+                        //finish();
                     }
                 });
         android.app.AlertDialog alert = builder.create();
@@ -929,8 +949,40 @@ public class MainConfigActivity extends PreferenceActivity implements
         return true;
     }
 
+    final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
+
+    private void updateCalendarListWrapper() {
+
+        int hasWriteContactsPermission = ContextCompat.checkSelfPermission(this,Manifest.permission.READ_CALENDAR);
+        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_CALENDAR},
+                    REQUEST_CODE_ASK_PERMISSIONS);
+            return;
+        }
+        updateCalendarList();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    updateCalendarList();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(this, "READ_CALENDAR Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
     private boolean updateCalendarList()
     {
+        mCalenderListUpdated = false;
         mCalendarList.clear();
 
         String[] projection =
@@ -946,6 +998,8 @@ public class MainConfigActivity extends PreferenceActivity implements
         permission = "android.permission.READ_CALENDAR";
         int res = this.checkCallingOrSelfPermission(permission);
         if (res == PackageManager.PERMISSION_GRANTED) {
+
+            mCalenderListUpdated = true;
             Cursor calCursor =
                     getContentResolver().
                             query(CalendarContract.Calendars.CONTENT_URI,
@@ -1030,7 +1084,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                     if (mCalendarList.size() == 1) {
                         mSelectedCalendarListIdx = 0;
                     }
-                    else
+                    else if (false)
                     {
                         String[] calNameArray = new String[mCalendarList.size()];
                         c=0;
@@ -1067,7 +1121,7 @@ public class MainConfigActivity extends PreferenceActivity implements
             return (mCalendarList.size() != 0);
         }
         else
-            return  false;
+            return false;
 
     }
 }
