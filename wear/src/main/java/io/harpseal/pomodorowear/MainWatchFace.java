@@ -306,6 +306,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
         boolean mLowBitAmbient;
 
 
+        int mMainThemeColor = 0xffE3B200;
+
         WatchFaceUtil.WatchControlState mControlState = WatchFaceUtil.WatchControlState.WCS_IDLE;
 
         @Override
@@ -339,10 +341,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mInteractionTextPaint.setAntiAlias(true);
 
             mBackgroundBitmap = null;//BitmapFactory.decodeResource(getResources(), R.drawable.face0_bg);
-            mBitmapSec = BitmapFactory.decodeResource(getResources(), R.drawable.face2_sec);
-            mBitmapMin = BitmapFactory.decodeResource(getResources(), R.drawable.face2_min);
-            mBitmapHour = BitmapFactory.decodeResource(getResources(), R.drawable.face2_hour);
-            mBitmapMeterCenter = BitmapFactory.decodeResource(getResources(), R.drawable.face2_meter_center);
+            mBitmapSec = BitmapFactory.decodeResource(getResources(), R.drawable.face3_sec);
+            mBitmapMin = BitmapFactory.decodeResource(getResources(), R.drawable.face4_min);
+            mBitmapHour = BitmapFactory.decodeResource(getResources(), R.drawable.face4_hour);
+            mBitmapMeterCenter = BitmapFactory.decodeResource(getResources(), R.drawable.face3_meter_center);
 
             mInteractionOverlayPaint = new Paint();
             mInteractionOverlayPaint.setColor(Color.BLACK);
@@ -819,7 +821,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             paint.setColor(strokeColor);
             paint.setStrokeWidth(strokeWidth);
             paint.setAntiAlias(!mLowBitAmbient);
-            if (mAmbient)
+            if (mAmbient && mSimpleAmbient)
                 paint.setStrokeCap(Paint.Cap.SQUARE );
             else
                 paint.setStrokeCap(Paint.Cap.ROUND);
@@ -1050,7 +1052,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, 2, 0, 1, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX - 8, 0, 360, 6, 5, 0, 1, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 4, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, -90, 90, 90, -1, 0, 8, 0xffE3B200, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, -90, 90, 90, -1, 0, 8, mMainThemeColor, false);
 
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF , Typeface.BOLD));
@@ -1089,7 +1091,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, 2, 0, 1, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX - 8, 0, 360, 6, 5, 0, 1, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 4, 0xffffffff, false);
-                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, 0, 360, 90, -1, 0, 8, 0xffE3B200, false);
+                drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, 0, 360, 90, -1, 0, 8, mMainThemeColor, false);
 
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
@@ -1217,10 +1219,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 mInteractionTextPaint.setTextSize(height / 8);
                 //mInteractionTextPaint.setTypeFace(Typeface.BOLD);
                 mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-                if (mAmbient)
-                    mInteractionTextPaint.setColor(0xffE3B200);
-                else
-                    mInteractionTextPaint.setColor(0xffE3B200);
+                mInteractionTextPaint.setColor(mMainThemeColor);
                 tmpCanvas.drawText(mClockDay, centerX + width / 4, centerY + height / 10, mInteractionTextPaint);
 
                 float dateHeight = mInteractionTextPaint.descent() - mInteractionTextPaint.ascent();
@@ -1245,7 +1244,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 if (!mAmbient) {
                     drawMeter(canvas, DRAW_SEC, mTimerMS, timerX, timerY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, mDataTimerDateStart == mDataTimerDateEnd ? 0xff00b000 : 0xffE30300);
                     if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                        drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, 0xffE3B200);
+                        drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, 0xff00b000, Color.YELLOW);
                     else
                         drawMeter(canvas, DRAW_SEC, mTomatoMS, tomatoX, tomatoY, meterLengthHour, meterLength, meterLengthSec, Color.GRAY, 0xffE30300);
                 }
@@ -1275,7 +1274,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
                 drawMeter(tmpCanvas, DRAW_MIN, mTimerMS,timerX,timerY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,mDataTimerDateStart == mDataTimerDateEnd?0xff00b000:0xffE30300);
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,0xffE3B200);
+                    drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,0xff00b000,Color.YELLOW);
                 else
                     drawMeter(tmpCanvas,DRAW_MIN,mTomatoMS,tomatoX,tomatoY,meterLengthHour,meterLength,meterLengthSec,Color.GRAY,0xffE30300);
 
@@ -1392,7 +1391,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mBatteryPredictionCurrentLevel = batteryLevel;
 
 
-                    float colorAngle = 3.1415926f*(float)batteryLevel/100;
+                    float colorAngle = 3.1415926f*(float)(batteryLevel-40)/(100-40);
+                    if (colorAngle<0)colorAngle=0;
                     //mHandPaintMeter.setColor(0xffE30300);
                     mHandPaintMeter.setARGB(255,(int)(127.0*Math.cos(colorAngle))+127,(int)(127.0*Math.cos(colorAngle-2.0944))+127,(int)(127.0*Math.cos(colorAngle-2.0944*2))+127);
                     meterX = (float) Math.sin(batteryRot) * meterLength;
