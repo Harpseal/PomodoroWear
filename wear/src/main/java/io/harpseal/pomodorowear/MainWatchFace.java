@@ -16,11 +16,13 @@
 
 package io.harpseal.pomodorowear;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -39,6 +41,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.provider.CalendarContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.DateFormat;
@@ -310,6 +314,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
         WatchFaceUtil.WatchControlState mControlState = WatchFaceUtil.WatchControlState.WCS_IDLE;
 
+
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -332,7 +338,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             Resources resources = MainWatchFace.this.getResources();
 
-            mBackgroundPaint = new Paint();
+            mBackgroundPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
             mBackgroundPaint.setColor(resources.getColor(R.color.analog_background));
 
             mInteractionTextPaint = new Paint();
@@ -395,6 +401,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
             mSimpleAmbient = (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
             // = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
             //mTime = new Time();
+
         }
 
         private void updateClock(TimeZone timeZone)
@@ -1012,42 +1019,39 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             if (mBackgroundBitmap == null)
             {
-                mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.watch_face_bg_m0);
+                mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.face0_bg3);
                 float scale;
                 scale = (float)width/(float)mBackgroundBitmap.getWidth();
-                mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
-                        (int) ((float) mBackgroundBitmap.getWidth() * scale),
-                        (int) ((float) mBackgroundBitmap.getHeight() * scale), true);
+                if (scale != 1)
+                    mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
+                            (int) ((float) mBackgroundBitmap.getWidth() * scale),
+                            (int) ((float) mBackgroundBitmap.getHeight() * scale), true);
 
-                Bitmap bitmapShadow = BitmapFactory.decodeResource(getResources(), R.drawable.face_shadow2);
-                scale = (float)width/(float)bitmapShadow.getWidth();
-                bitmapShadow = Bitmap.createScaledBitmap(bitmapShadow,
-                        (int) ((float) bitmapShadow.getWidth() * scale),
-                        (int) ((float) bitmapShadow.getHeight() * scale), true);
+//                Bitmap bitmapShadow = BitmapFactory.decodeResource(getResources(), R.drawable.face_shadow2);
+//                scale = (float)width/(float)bitmapShadow.getWidth();
+//                bitmapShadow = Bitmap.createScaledBitmap(bitmapShadow,
+//                        (int) ((float) bitmapShadow.getWidth() * scale),
+//                        (int) ((float) bitmapShadow.getHeight() * scale), true);
 
                 //mBackgroundBitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
 
                 mCacheCanvas.setBitmap(mBackgroundBitmap);
 
-                mCacheCanvas.drawBitmap(bitmapShadow, 0, 0, mBackgroundPaint);
-//                mCacheCanvas.save();
-//                mCacheCanvas.scale(scale, scale);
-//                //mCacheCanvas.translate(-(512-320)/2,-(512-320)/2);
-//                mCacheCanvas.drawBitmap(bg, 0, 0, mBackgroundPaint);
-//                mCacheCanvas.restore();
+                //mCacheCanvas.drawBitmap(bitmapShadow, 0, 0, mBackgroundPaint);
+
 
 
                 Paint paint = new Paint();
                 paint.setStyle(Paint.Style.FILL);
                 paint.setARGB(128, 0, 0, 0);
                 paint.setAntiAlias(true);
-                mCacheCanvas.drawCircle(timerX, timerY, meterLengthSec, paint);
-                mCacheCanvas.drawCircle(tomatoX,tomatoY,meterLengthSec,paint);
+                //mCacheCanvas.drawCircle(timerX, timerY, meterLengthSec, paint);
+                //mCacheCanvas.drawCircle(tomatoX,tomatoY,meterLengthSec,paint);
 
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setARGB(255, 128, 128, 128);
-                mCacheCanvas.drawCircle(timerX, timerY, meterLengthSec, paint);
-                mCacheCanvas.drawCircle(tomatoX,tomatoY,meterLengthSec,paint);
+                //mCacheCanvas.drawCircle(timerX, timerY, meterLengthSec, paint);
+                //mCacheCanvas.drawCircle(tomatoX,tomatoY,meterLengthSec,paint);
 
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 12, 0, 360, 3, 2, 0, 1, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX - 8, 0, 360, 6, 5, 0, 1, 0xffffffff, false);
@@ -1055,9 +1059,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, -90, 90, 90, -1, 0, 8, mMainThemeColor, false);
 
 
-                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF , Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
+                //mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF , Typeface.BOLD));
+                mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 270, 180, 3, 6, 30, 0xffffffff, false);//3,9
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 360, 360, 30, 12, 0, 30, 0xffffffff, false);//12
                 mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 30, 60, 30, 1, 1, 30, 0xffffffff, false);//1,2
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 120, 150, 30, 4, 1, 30, 0xffffffff, false);//4,5
@@ -1093,9 +1098,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 16, centerX - 4, 0, 360, 30, 3, 0, 4, 0xffffffff, false);
                 drawTickLine(mCacheCanvas, centerX, centerY, centerX - 20, centerX, 0, 360, 90, -1, 0, 8, mMainThemeColor, false);
 
-                mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 90, 270, 180, 3, 6, 46, 0xffffffff, false);//3,9
-                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 42, 360, 360, 30, 12, 0, 46, 0xffffffff, false);//12
+                //mInteractionTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+                mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 90, 270, 180, 3, 6, 30, 0xffffffff, false);//3,9
+                drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 360, 360, 30, 12, 0, 30, 0xffffffff, false);//12
                 mInteractionTextPaint.setTypeface(Typeface.MONOSPACE);
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 30, 60, 30, 1, 1, 30, 0xffffffff, false);//1,2
                 drawTickNumber(mCacheCanvas, centerX, centerY, centerX - 36, 120, 150, 30, 4, 1, 30, 0xffffffff, false);//4,5
@@ -1205,7 +1211,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     //mCacheBitmapAmbientHour.eraseColor(0xff000000);
                     mCacheCanvas.setBitmap(mCacheBitmapAmbientHour);
                     tmpCanvas = mCacheCanvas;
-                    tmpCanvas.drawBitmap(mBackgroundBitmapAmbient, 0, 0, mBackgroundPaint);
+                    tmpCanvas.drawBitmap(mSimpleAmbient?mBackgroundBitmapAmbient:mBackgroundBitmap, 0, 0, mBackgroundPaint);
                 }
                 else {
                     //mCacheBitmapHour.eraseColor(0xff000000);
@@ -1428,7 +1434,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         Log.d(TAG, "Send getting phone battery msg..." + eventMsgMap.toString());
                         new SendActivityPhoneMessage(eventMsgMap,MainWatchFace.this).start();
                     }
-                    else if (mPhoneBatteryRetryLeft == 0 && (curTimeMS > mPhoneBatteryLastUpdateTime + WatchFaceUtil.DEFAULT_TOMATO_PHONE_BATTERY_WAIT_LONG || !mIsConnected)) {
+                    else if (mPhoneBatteryRetryLeft == 0 && (curTimeMS > mPhoneBatteryLastUpdateTime + WatchFaceUtil.DEFAULT_TOMATO_PHONE_BATTERY_WAIT_LONG)) {// || !mIsConnected
                         mPhoneBatteryRetryLeft = 4;
                     }
                     //else

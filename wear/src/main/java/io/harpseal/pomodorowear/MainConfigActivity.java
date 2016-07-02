@@ -1,5 +1,6 @@
 package io.harpseal.pomodorowear;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.DialogInterface;
@@ -13,6 +14,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.wearable.provider.WearableCalendarContract;
 import android.support.wearable.view.BoxInsetLayout;
@@ -82,6 +85,8 @@ public class MainConfigActivity extends Activity implements
 
     private ConfigItemListAdapter mListAdapter;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -149,6 +154,12 @@ public class MainConfigActivity extends Activity implements
                 .addApi(Wearable.API)
                 .build();
 
+        int hasWriteContactsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR);
+        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_CALENDAR},
+                    WatchFaceUtil.REQUEST_CODE_ASK_PERMISSIONS);
+            return;
+        }
     }
 
     @Override

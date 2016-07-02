@@ -144,7 +144,7 @@ public final class WatchFaceUtil {
 
 
 
-
+    public static final int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
 
     /**

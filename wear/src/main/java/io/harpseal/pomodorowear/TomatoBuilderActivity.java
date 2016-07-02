@@ -1,12 +1,16 @@
 package io.harpseal.pomodorowear;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.speech.RecognizerIntent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WearableListView;
@@ -190,6 +194,13 @@ public class TomatoBuilderActivity extends Activity implements
         infoFromExtra += " -> " + DateFormat.format("yyyy/MM/dd HH:mm:ss", cal).toString();
         Log.d(TAG,infoFromExtra);
 
+
+        int hasWriteContactsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR);
+        if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_CALENDAR},
+                    WatchFaceUtil.REQUEST_CODE_ASK_PERMISSIONS);
+            return;
+        }
     }
 
     @Override

@@ -949,14 +949,13 @@ public class MainConfigActivity extends PreferenceActivity implements
         return true;
     }
 
-    final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
     private void updateCalendarListWrapper() {
 
         int hasWriteContactsPermission = ContextCompat.checkSelfPermission(this,Manifest.permission.READ_CALENDAR);
         if (hasWriteContactsPermission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,new String[] {Manifest.permission.READ_CALENDAR},
-                    REQUEST_CODE_ASK_PERMISSIONS);
+                    WatchFaceUtil.REQUEST_CODE_ASK_PERMISSIONS);
             return;
         }
         updateCalendarList();
@@ -965,7 +964,7 @@ public class MainConfigActivity extends PreferenceActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_CODE_ASK_PERMISSIONS:
+            case WatchFaceUtil.REQUEST_CODE_ASK_PERMISSIONS:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission Granted
                     updateCalendarList();
