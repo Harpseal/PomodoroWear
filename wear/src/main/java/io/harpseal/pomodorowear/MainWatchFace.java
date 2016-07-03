@@ -609,7 +609,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                                 WatchFaceUtil.overwriteKeysInConfigDataMap(mGoogleApiClient, configKeysToOverwrite);
                             }
 
-                            if (dtstart!=0 && dtend>dtstart)
+                            if (dtstart!=0 && dtend>=dtstart)
                             {
                                     Intent i = new Intent(getApplicationContext(), TomatoBuilderActivity.class);
                                     i.putExtra(CalendarContract.Events.DTSTART,dtstart);
@@ -1705,7 +1705,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
             {
                 mUpdateFlag |= DRAW_MIN|DRAW_SEC;
                 mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
-                mVibrator.vibrate(new long[]{10, 500, 200, 500, 200, 500}, -1);
+                if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
+                    mVibrator.vibrate(new long[]{10, 250, 200, 250}, -1);
+                else
+                    mVibrator.vibrate(new long[]{10, 200, 500, 200, 200, 200}, -1);
 //                new Thread(){
 //                    @Override
 //                    public void run()
@@ -2092,12 +2095,12 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
 
                 List<Node> nodes = result.getNodes();
-                for (Node n : nodes)
+
+                for (Node n : nodes) {
                     Log.d(TAG,"Node " + n.getId() + "  " + n.getDisplayName());
-                if (nodes.size() > 0) {
-                    MessageApi.SendMessageResult sendResult = Wearable.MessageApi.sendMessage(mGoogleApiClient, nodes.get(0).getId(), path, dataMap.toByteArray()).await();
+                    MessageApi.SendMessageResult sendResult = Wearable.MessageApi.sendMessage(mGoogleApiClient, n.getId(), path, dataMap.toByteArray()).await();
                     if (sendResult.getStatus().isSuccess()) {
-                        Log.v(TAG, "Wear: Activity Message: {" + dataMap.toString() + "} sent to: " + nodes.get(0).getId());
+                        Log.v(TAG, "Wear: Activity Message: {" + dataMap.toString() + "} sent to: " + n.getId());
                         MainWatchFace.this.setIsConnected(true);
                     } else {
                         // Log an error
@@ -2105,7 +2108,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         MainWatchFace.this.setIsConnected(false);
                     }
                 }
-                else {
+                if (nodes.size() == 0) {
                     Log.v(TAG, "Wear ERROR: no node to send....");
                     MainWatchFace.this.setIsConnected(false);
                 }

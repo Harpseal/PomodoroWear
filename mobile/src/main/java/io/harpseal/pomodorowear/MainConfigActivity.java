@@ -558,7 +558,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                         Log.d(TAG,"Node " + n.getId() + "  " + n.getDisplayName());
                     if (nodes.size() > 0) {
                         mPeerId = nodes.get(0).getId();
-
+                        //if (nodes.size() > 1)
+                            Toast.makeText(getBaseContext(), "Connected to " + nodes.get(0).getDisplayName(), Toast.LENGTH_LONG).show();
                         Uri.Builder builder = new Uri.Builder();
                         Uri uri = builder.scheme("wear").path(WatchFaceUtil.PATH_WITH_FEATURE).authority(mPeerId).build();
                         Log.d(TAG, "onConnected url: " + uri.toString());

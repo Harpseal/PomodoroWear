@@ -58,7 +58,7 @@ public class MainWatchFaceConfigListenerService extends WearableListenerService
             return;
         }
         else if (!messageEvent.getPath().equals(WatchFaceUtil.PATH_WITH_FEATURE)) {
-            Log.d(TAG,"onMessageReceived + PATH_WITH_FEATURE");
+            Log.d(TAG,"onMessageReceived is not PATH_WITH_FEATURE");
             return;
         }
 

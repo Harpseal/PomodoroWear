@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -32,6 +33,7 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.google.android.gms.common.ConnectionResult;
@@ -125,8 +127,14 @@ public class MainActivity extends AppCompatActivity implements
                 //sendMessageToWear("MsgString","string~~");
                 //sendMessageToWear("PhoneBattery",98);
 
-                new SendActivityPhoneMessage("PhoneBattery", 96).start();
-                sendMessageToWear("PhoneBatteryPeer", 98);
+//                new SendActivityPhoneMessage("PhoneBattery", 96).start();
+//                sendMessageToWear("PhoneBatteryPeer", 98);
+                long curTimeMS = System.currentTimeMillis();
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(curTimeMS);
+                updateEventListByDay(cal.getTime());
+
             }
         });
 
@@ -372,12 +380,18 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     final static int MSG_SHOW_NO_PEER_DIALOG = 100;
+    final static int MSG_SHOW_CONNECT_NODES = 101;
     private Handler mHandler = new Handler(){
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SHOW_NO_PEER_DIALOG:
                     displayNoConnectedDeviceDialog();
                     break;
+                case MSG_SHOW_CONNECT_NODES:
+                    String MsgString = (String)msg.obj;
+                    Toast.makeText(MainActivity.this,MsgString , Toast.LENGTH_LONG).show();
+                    break;
+
             }
             super.handleMessage(msg);
         }
@@ -408,6 +422,19 @@ public class MainActivity extends AppCompatActivity implements
                     if (nodes.size() > 0) {
                         mPeerId = nodes.get(0).getId();
 
+                        Message message;
+                        String obj;
+                        if (nodes.size() > 1) {
+                            obj = "Warning! There are " + nodes.size() + " nodes\nConnected to " + nodes.get(0).getDisplayName();
+                        }
+                        else
+                        {
+                            obj = "Connected to " + nodes.get(0).getDisplayName();
+                        }
+                        message = mHandler.obtainMessage(MSG_SHOW_CONNECT_NODES,obj);
+                        mHandler.sendMessage(message);
+                        //else
+                        //    Toast.makeText(MainActivity.this, "Connected to " + nodes.get(0).getDisplayName(), Toast.LENGTH_LONG).show();
                         Uri.Builder builder = new Uri.Builder();
                         Uri uri = builder.scheme("wear").path(WatchFaceUtil.PATH_WITH_FEATURE).authority(mPeerId).build();
                         Log.d(TAG, "onConnected url: " + uri.toString());
@@ -562,6 +589,7 @@ public class MainActivity extends AppCompatActivity implements
             // If DataItem with the current config can't be retrieved, select the default items on
             // each picker.
             //setUpAllPickers(null);
+            updateCalendarList();
         }
     }
 
@@ -587,8 +615,8 @@ public class MainActivity extends AppCompatActivity implements
                 .setCancelable(false)
                 .setPositiveButton(okText, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //updateCalendarList();
-                        finish();
+                        updateCalendarList();
+                        //finish();
                     }
                 });
         android.app.AlertDialog alert = builder.create();
@@ -920,6 +948,9 @@ public class MainActivity extends AppCompatActivity implements
 
                 } while (eventCursor.moveToNext());
             }
+            else
+                Log.d("MainActivity","eventCursor.moveToFirst() == null");
+
 
         }
         else
