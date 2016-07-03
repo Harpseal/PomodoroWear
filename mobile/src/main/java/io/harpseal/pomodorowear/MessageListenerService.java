@@ -254,6 +254,10 @@ public class MessageListenerService extends WearableListenerService {
                             long dtend = event.getLong(CalendarContract.Events.DTEND,0);
                             long calID = event.getLong(CalendarContract.Events.CALENDAR_ID, 0);
 
+                            dtstart-= dtstart % 1000;
+                            dtend -= dtend % 1000;
+                            if (dtstart == dtend) dtend+=1000;
+
                             String strTitle = event.getString(CalendarContract.Events.TITLE, "");
                             String strDescription = event.getString(CalendarContract.Events.DESCRIPTION,"");
                             String strTimeZone = event.getString(CalendarContract.Events.EVENT_TIMEZONE,"");
@@ -266,14 +270,23 @@ public class MessageListenerService extends WearableListenerService {
                                 continue;
                             }
 
-                            long timeRange = 5000; //5sec
+                            long timeRange = 2000; //5sec
                             ArrayList<EventItem> existList = getEvents(calID,dtstart-timeRange,dtend+timeRange);
                             if (existList != null && existList.size()!=0)
                             {
-                                Log.d(TAG,"event has already created. " + event.toString());
-                                eventQueue.remove(e);
-                                e--;
-                                continue;
+                                for (EventItem item : existList)
+                                {
+                                    if (Math.abs(item.start - dtstart) < timeRange &&
+                                            Math.abs(item.end - dtend) < timeRange &&
+                                            item.title.equals(strTitle))
+                                    {
+                                        Log.d(TAG,"event has already created. " + event.toString());
+                                        eventQueue.remove(e);
+                                        e--;
+                                        continue;
+                                    }
+                                }
+
                             }
 
 

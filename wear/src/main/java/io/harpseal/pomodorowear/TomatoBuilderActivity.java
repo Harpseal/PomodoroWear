@@ -22,6 +22,7 @@ import android.view.WindowInsets;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,11 +32,16 @@ import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class TomatoBuilderActivity extends Activity implements
         WearableListView.ClickListener, WearableListView.OnScrollListener,
@@ -64,6 +70,8 @@ public class TomatoBuilderActivity extends Activity implements
     private long mEventDTStart = 0;
     private long mEventDTEnd = 0;
     private long mEventCalendarID = 0;
+
+    private boolean mEventDelivered = false;
 
     private ArrayList<DataMap> mEventQueue = null;
 
@@ -168,7 +176,18 @@ public class TomatoBuilderActivity extends Activity implements
                 configKeysToOverwrite.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE, mEventQueue);
                 WatchFaceUtil.overwriteKeysInConfigDataMap(mGoogleApiClient, configKeysToOverwrite);
 
-                finish();
+                //finish();
+                mEventDelivered = true;
+
+                mBtnOK.setEnabled(false);
+                mBtnOK.setAlpha(0.5f);
+                mBtnMic.setEnabled(false);
+                mBtnMic.setAlpha(0.5f);
+                mTagListView.setEnabled(false);
+                mTagListView.setAlpha(0.5f);
+//
+
+
             }
         });
 
@@ -511,6 +530,27 @@ public class TomatoBuilderActivity extends Activity implements
                 {
                     Log.d(TAG,map.toString());
                 }
+                if (mEventDelivered)
+                {
+                    if (mEventQueue.size()!=0)
+                    {
+                        DataMap eventMsgMap = new DataMap();
+                        eventMsgMap.putLong(WatchFaceUtil.MSG_ID_KEY, System.currentTimeMillis());
+                        eventMsgMap.putString(WatchFaceUtil.MSG_SENDER_KEY, WatchFaceUtil.MSG_SENDER_WATCH_FACE);
+                        eventMsgMap.putInt(WatchFaceUtil.MSG_TYPE_KEY, WatchFaceUtil.MSG_TYPE_CREATE_EVENT);
+
+                        Log.d(TAG,"Send create event msg..." + eventMsgMap.toString());
+                        new SendActivityPhoneMessage(eventMsgMap,this).start();
+                    }
+                    else
+                    {
+                        Toast.makeText(this, getResources().getString(R.string.face_msg_event_sent), Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                    // && mEventQueue.size()==0
+                    //mEventDelivered = true;
+
+                }
             }else {
                 Log.w(TAG, "Ignoring unknown config key: " + configKey);
             }
@@ -546,6 +586,84 @@ public class TomatoBuilderActivity extends Activity implements
     public void onConnectionFailed(ConnectionResult result) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "onConnectionFailed: " + result);
+        }
+    }
+
+
+
+    class SendActivityPhoneMessage extends Thread {
+        String path;
+        DataMap dataMap;
+        TomatoBuilderActivity act = null;
+
+        // Constructor to send a message to the data layer
+//            SendActivityPhoneMessage(String p, DataMap data) {
+//                path = p;// WatchFaceUtil.PATH_WITH_FEATURE
+//                dataMap = data;
+//            }
+
+        SendActivityPhoneMessage(DataMap data) {
+            path = WatchFaceUtil.PATH_WITH_MESSAGE;
+            dataMap = data;
+        }
+
+        SendActivityPhoneMessage(DataMap data,TomatoBuilderActivity watch) {
+            path = WatchFaceUtil.PATH_WITH_MESSAGE;
+            dataMap = data;
+            act = watch;
+        }
+
+
+        SendActivityPhoneMessage(String key,int value) {
+            path = WatchFaceUtil.PATH_WITH_MESSAGE;
+            dataMap = new DataMap();
+            dataMap.putInt(key, value);
+        }
+
+        SendActivityPhoneMessage(String key,String str) {
+            path = WatchFaceUtil.PATH_WITH_MESSAGE;
+            dataMap = new DataMap();
+            dataMap.putString(key, str);
+        }
+
+        public void run() {
+//                if (!mGoogleApiClient.isConnected())
+//                    mGoogleApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
+//                NodeApi.GetLocalNodeResult nodes = Wearable.NodeApi.getLocalNode(mGoogleApiClient).await();
+//                Node node = nodes.getNode();
+//                Log.v(TAG, "Activity Node is : "+node.getId()+ " - " + node.getDisplayName());
+//                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), path, dataMap.toByteArray()).await();
+//                if (result.getStatus().isSuccess()) {
+//                    Log.v(TAG, "Wear: Activity Message: {" + dataMap.toString() + "} sent to: " + node.getDisplayName());
+//                }
+//                else {
+//                    // Log an error
+//                    Log.v(TAG, "ERROR: failed to send Activity Message");
+//                }
+
+            if (!mGoogleApiClient.isConnected())
+                mGoogleApiClient.blockingConnect(100, TimeUnit.MILLISECONDS);
+            NodeApi.GetConnectedNodesResult result =
+                    Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+
+            List<Node> nodes = result.getNodes();
+
+            for (Node n : nodes) {
+                Log.d(TAG,"Node " + n.getId() + "  " + n.getDisplayName());
+                MessageApi.SendMessageResult sendResult = Wearable.MessageApi.sendMessage(mGoogleApiClient, n.getId(), path, dataMap.toByteArray()).await();
+                if (sendResult.getStatus().isSuccess()) {
+                    Log.v(TAG, "Wear: Activity Message: {" + dataMap.toString() + "} sent to: " + n.getId());
+                } else {
+                    // Log an error
+                    Log.v(TAG, "Wear ERROR: failed to send Activity Message");
+                    if (act!=null) act.finish();
+                }
+            }
+            if (nodes.size() == 0) {
+                Log.v(TAG, "Wear ERROR: no node to send....");
+                if (act!=null) act.finish();
+            }
+
         }
     }
 }

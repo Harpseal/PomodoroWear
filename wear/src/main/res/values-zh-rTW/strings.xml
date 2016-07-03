@@ -11,7 +11,7 @@
     <string name="config_item_lv1_calendar">日曆</string>
     <string name="config_item_lv1_tomato">Pomodoro</string>
     <string name="config_item_lv1_timer">計時器</string>
-    <string name="config_item_lv1_clear_event_queue">事件佇列</string>
+    <string name="config_item_lv1_clear_event_queue">清除佇列</string>
 
 
 
@@ -64,9 +64,10 @@
     <string name="face_msg_profile_4">設定4</string>
     <string name="face_msg_short_minute">分鐘</string>
     <string name="face_msg_reset">重設</string>
-    <string name="config_item_lv1_no_event">無未送出事件</string>
-    <string name="config_item_lv1_one_event">一個未送出事件</string>
-    <string name="config_item_lv1_event_in_eqeue">個未送出事件</string>
+    <string name="config_item_lv1_no_event">無事件</string>
+    <string name="config_item_lv1_one_event">一個事件</string>
+    <string name="config_item_lv1_event_in_eqeue">個事件</string>
     <string name="pomodoro_msg_short_minute">分鐘</string>
+    <string name="face_msg_event_sent">事件已儲存</string>
 
 </resources>

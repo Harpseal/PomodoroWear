@@ -66,6 +66,7 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -995,6 +996,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             int hours,minutes,seconds;
             long curTimeMS = System.currentTimeMillis();
+
+//            long timeFloor = curTimeMS - curTimeMS%60000;
+//            SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTimeInMillis(curTimeMS - curTimeMS%1000);
+//            String strSec1 = sdFormat.format(cal.getTime());//DateFormat.format("HH:mm:ss.SSS", cal).toString();
+//            cal.setTimeInMillis(curTimeMS - curTimeMS%60000);
+//            String strSec60 = sdFormat.format(cal.getTime());//DateFormat.format("HH:mm:ss.SSS", cal).toString();
+//            cal.setTimeInMillis(curTimeMS);
+//            Log.d(TAG,strSec1 + "  " + strSec60 + "  " + sdFormat.format(cal.getTime()));
+
 
             seconds = (int)((curTimeMS - mClockBase)/1000);
             if (seconds> 24*60*60)
@@ -1926,8 +1938,14 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mDataTimer4 = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER_DATE_START)) {
                     mDataTimerDateStart = config.getLong(configKey);
+                    mCacheLastUpeateHour = -1;
+                    mCacheLastUpeateMin = -1;
+                    mCacheLastUpeateAmbienHour = -1;
                 } else if (configKey.equals(WatchFaceUtil.KEY_TIMER_DATE_END)) {
                     mDataTimerDateEnd = config.getLong(configKey);
+                    mCacheLastUpeateHour = -1;
+                    mCacheLastUpeateMin = -1;
+                    mCacheLastUpeateAmbienHour = -1;
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_WORK)) {
                     mDataTomatoWork = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_RELAX)) {
@@ -1993,12 +2011,18 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mTomatoType = config.getString(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_DATE_START)) {
                     mDataTomatoDateStart = config.getLong(configKey);
+                    mCacheLastUpeateHour = -1;
+                    mCacheLastUpeateMin = -1;
+                    mCacheLastUpeateAmbienHour = -1;
 //                    Long dateInMillis = config.getLong(configKey);uiUpdated = true;
 //                    Calendar cal = Calendar.getInstance();
 //                    cal.setTimeInMillis(dateInMillis);
 //                    mTomatoDate = cal.getTime();
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_DATE_END)) {
                     mDataTomatoDateEnd = config.getLong(configKey);
+                    mCacheLastUpeateHour = -1;
+                    mCacheLastUpeateMin = -1;
+                    mCacheLastUpeateAmbienHour = -1;
                 } else {
                     Log.w(TAG, "Ignoring unknown config key: " + configKey);
                 }
