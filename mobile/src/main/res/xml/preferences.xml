@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="pref_key_build_info"
+        android:summary=""
+        android:title="@string/perf_item_build_info" />
     <PreferenceCategory android:title="@string/perf_category_pomodoro" >
         <Preference
             android:key="pref_key_pomodoro_calendar"

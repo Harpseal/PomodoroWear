@@ -38,7 +38,9 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
@@ -73,6 +75,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On
@@ -139,19 +143,29 @@ public class MainWatchFace extends CanvasWatchFaceService {
      * Handler message id for updating the time periodically in interactive mode.
      */
     private static final int MSG_UPDATE_TIME = 0;
+    private static final int MSG_TIMER = 1;
+    private static final int MSG_TOMATO = 2;
+    private static final int MSG_WAKELOCK_RELEASE = 3;
 
     private int mDataTomatoWork = WatchFaceUtil.DEFAULT_TOMATO_WORK;
     private int mDataTomatoRelax = WatchFaceUtil.DEFAULT_TOMATO_RELAX;
     private int mDataTomatoRelaxLong = WatchFaceUtil.DEFAULT_TOMATO_RELAX_LONG;
 
+    private PowerManager.WakeLock mWakeLock;
+
+    private HandlerThread mDataTomatoHanderThread = null;
+    private Handler mDataTomatoHander = null;
     private long mDataTomatoDateStart = WatchFaceUtil.DEFAULT_TIMER_ZERO;
     private long mDataTomatoDateEnd = WatchFaceUtil.DEFAULT_TIMER_ZERO;
+
 
     private int mDataTimer1 = WatchFaceUtil.DEFAULT_TIMER1;
     private int mDataTimer2 = WatchFaceUtil.DEFAULT_TIMER2;
     private int mDataTimer3 = WatchFaceUtil.DEFAULT_TIMER3;
     private int mDataTimer4 = WatchFaceUtil.DEFAULT_TIMER4;
 
+    private HandlerThread mDataTimerHanderThread = null;
+    private Handler mDataTimerHander = null;
     private long mDataTimerDateStart = WatchFaceUtil.DEFAULT_TIMER_ZERO;
     private long mDataTimerDateEnd = WatchFaceUtil.DEFAULT_TIMER_ZERO;
 
@@ -162,6 +176,16 @@ public class MainWatchFace extends CanvasWatchFaceService {
     short mCacheLastUpeateHour = -1;
     short mCacheLastUpeateMin = -1;
     short mCacheLastUpeateAmbienHour = -1;
+
+    short mCacheLastUpeateTimerHour = -1;
+    short mCacheLastUpeateTimerMin = -1;
+    short mCacheLastUpeateTimerAmbientHour = -1;
+    short mCacheLastUpeateTimerAmbientMin = -1;
+
+    short mCacheLastUpeateTomatoHour = -1;
+    short mCacheLastUpeateTomatoMin = -1;
+    short mCacheLastUpeateTomatoAmbientHour = -1;
+    short mCacheLastUpeateTomatoAmbientMin = -1;
 
     private int mPhoneBatteryRetryLeft = 4;
     private int mPhoneBattery = -100;
@@ -337,6 +361,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
 
             mVibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
 
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            mWakeLock = powerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "MyWakelockTag");
+
+            mDataTomatoHanderThread = new HandlerThread("DataTomatoHanderThread");
+            mDataTomatoHanderThread.start();
+            mDataTomatoHander = new Handler(mDataTomatoHanderThread.getLooper());
+
+            mDataTimerHanderThread = new HandlerThread("DataTimerHanderThread");
+            mDataTimerHanderThread.start();
+            mDataTimerHander = new Handler(mDataTimerHanderThread.getLooper());
+
             Resources resources = MainWatchFace.this.getResources();
 
             mBackgroundPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -404,6 +439,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
             //mTime = new Time();
 
         }
+
+
 
         private void updateClock(TimeZone timeZone)
         {
@@ -626,33 +663,45 @@ public class MainWatchFace extends CanvasWatchFaceService {
                             if (mDataTimerDateStart == 0 || mDataTimerDateEnd == 0)
                             {
                                 //mCurrentCalender.setTime(new Date());
-                                mDataTimerDateStart = timeInMillis;
+
                                 isModifiedConfig = true;
-                                if (mTouchCoordinateX<mTouchWidth/2 && mTouchCoordinateY<mTouchHeight/2)
+                                //Log.d(TAG,"Timer " + Math.abs(mTouchCoordinateX - mTouchWidth/2) + " " + (mTouchWidth/2/3) + " ," + Math.abs(mTouchCoordinateY - mTouchHeight/2) + " " + (mTouchHeight/2/3));
+                                if (Math.abs(mTouchCoordinateX - mTouchWidth/2) < mTouchWidth/2/3 && Math.abs(mTouchCoordinateY - mTouchHeight/2) < mTouchHeight/2/3)
                                 {
+                                    isModifiedConfig = false;
+                                    //Log.d(TAG,"Timer Cancel");
+                                }
+                                else if (mTouchCoordinateX<mTouchWidth/2 && mTouchCoordinateY<mTouchHeight/2)
+                                {
+                                    mDataTimerDateStart = timeInMillis;
                                     mDataTimerDateEnd =mDataTimerDateStart+ mDataTimer1 *1000;
                                     //Log.d(TAG,"Timer1");
                                 }
                                 else if (mTouchCoordinateX>mTouchWidth/2 && mTouchCoordinateY<mTouchHeight/2)
                                 {
+                                    mDataTimerDateStart = timeInMillis;
                                     mDataTimerDateEnd =mDataTimerDateStart+ mDataTimer2 *1000;
                                     //Log.d(TAG,"Timer2");
                                 }
                                 else if (mTouchCoordinateX>mTouchWidth/2 && mTouchCoordinateY>mTouchHeight/2)
                                 {
+                                    mDataTimerDateStart = timeInMillis;
                                     mDataTimerDateEnd =mDataTimerDateStart+ mDataTimer3 *1000;
                                     //Log.d(TAG,"Timer3");
                                 }
                                 else {
+                                    mDataTimerDateStart = timeInMillis;
                                     mDataTimerDateEnd =mDataTimerDateStart+ mDataTimer4 *1000;
                                     //Log.d(TAG, "Timer4");
 
                                 }
 
-                                DataMap configKeysToOverwrite = new DataMap();
-                                configKeysToOverwrite.putLong(WatchFaceUtil.KEY_TIMER_DATE_START, mDataTimerDateStart);
-                                configKeysToOverwrite.putLong(WatchFaceUtil.KEY_TIMER_DATE_END, mDataTimerDateEnd);
-                                WatchFaceUtil.overwriteKeysInConfigDataMap(mGoogleApiClient, configKeysToOverwrite);
+                                if (isModifiedConfig) {
+                                    DataMap configKeysToOverwrite = new DataMap();
+                                    configKeysToOverwrite.putLong(WatchFaceUtil.KEY_TIMER_DATE_START, mDataTimerDateStart);
+                                    configKeysToOverwrite.putLong(WatchFaceUtil.KEY_TIMER_DATE_END, mDataTimerDateEnd);
+                                    WatchFaceUtil.overwriteKeysInConfigDataMap(mGoogleApiClient, configKeysToOverwrite);
+                                }
 
                             }
                             else
@@ -708,6 +757,9 @@ public class MainWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+            mWakeLock.release();
+            mDataTomatoHander.removeCallbacksAndMessages(null);
+            mDataTimerHander.removeCallbacksAndMessages(null);
             super.onDestroy();
         }
 
@@ -907,7 +959,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     timeMS*=-1;
                 }
 
-                int timerSec = (int)(timeMS/1000);//sec
+                int timerSec = (int)(timeMS/1000)+1;//sec
                 if (timerSec>60*60*12)
                     timerSec=60*60*12;
 
@@ -1619,6 +1671,8 @@ public class MainWatchFace extends CanvasWatchFaceService {
                         canvas.drawText(getResources().getString(R.string.face_msg_profile_4), centerX - width/4, centerY+shiftY1, mInteractionTextPaint);
 
 
+
+
                         lineHeight*=1.4;
                         mInteractionTextPaint.setTextSize(height / 10);
                         mInteractionTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
@@ -1631,6 +1685,10 @@ public class MainWatchFace extends CanvasWatchFaceService {
                                 centerX + width/4, centerY+shiftY1+lineHeight, mInteractionTextPaint);
                         canvas.drawText(""+(mDataTimer4/60) + " " + getResources().getString(R.string.face_msg_short_minute),
                                 centerX - width/4, centerY+shiftY1+lineHeight, mInteractionTextPaint);
+
+                        canvas.drawText(getResources().getString(R.string.face_msg_cancel),
+                                centerX , centerY+lineHeight/2, mInteractionTextPaint);
+
                         //canvas.drawText("Cancel", centerX - width/4, centerY+height/6+lineHeight/2, mInteractionTextPaint);
                     }
                     else
@@ -1687,7 +1745,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
         MainWatchFace.this.registerReceiver(mServiceMsgReceiver, intentFilter);
     }
 
-    private void unregisterReceiver() {
+        private void unregisterReceiver() {
         if (!mRegisteredTimeZoneReceiver) {
             return;
         }
@@ -1696,51 +1754,108 @@ public class MainWatchFace extends CanvasWatchFaceService {
         MainWatchFace.this.unregisterReceiver(mServiceMsgReceiver);
     }
 
-    private void updateCountDown()
+        private boolean fireTomatoTimer()
+        {
+            long curMs = System.currentTimeMillis();
+            long tomatoMS = mDataTomatoDateEnd == 0?Long.MAX_VALUE: mDataTomatoDateEnd - curMs;
+            mUpdateTimeHandler.removeMessages(MSG_TOMATO);
+            //mDataTomatoHander.removeCallbacksAndMessages(null);
+
+            Log.d(TAG,"mDataTomatoHander start: " + mDataTomatoDateEnd + " tomatoMS:" + tomatoMS);
+
+            if (mDataTomatoDateEnd !=0 && tomatoMS>100)
+            {
+                mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_TOMATO, tomatoMS+500);
+//                mDataTomatoHander.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Log.d(TAG,"mDataTomatoHander fired.");
+////
+////                        if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
+////                            mVibrator.vibrate(new long[]{10, 500, 200, 500}, -1);
+////                        else
+////                            mVibrator.vibrate(new long[]{10, 400, 200, 400, 500, 800}, -1);
+//
+//                        updateCountDown();
+//                        mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+//                        mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+//                    }
+//                }, tomatoMS+500);
+
+                return true;
+            }
+            return false;
+        }
+
+        private boolean fireTimer()
+        {
+            long curMs = System.currentTimeMillis();
+            long timerMS = mDataTimerDateEnd == 0?Long.MAX_VALUE: mDataTimerDateEnd - curMs;
+            mUpdateTimeHandler.removeMessages(MSG_TOMATO);
+            //mDataTimerHander.removeCallbacksAndMessages(null);
+
+            Log.d(TAG,"mDataTimerHander start: " + mDataTimerDateEnd + " timerMS:" + timerMS);
+
+            if (mDataTimerDateEnd != 0 && timerMS>100)
+            {
+                mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_TOMATO, timerMS+500);
+//                mDataTimerHander.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Log.d(TAG,"mDataTimerHander fired.");
+//                        //mVibrator.vibrate(new long[]{10, 800, 500, 400, 200, 400}, -1);
+//
+//                        updateCountDown();
+//                        mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+//                        mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+//                    }
+//                }, timerMS+500);
+
+                return true;
+            }
+            return false;
+
+        }
+
+        private void updateCountDown()
         {
             final int hourLengthInMS = 60*60*1000;
+            final int minLengthInMS = 60*1000;
             //Log.d(TAG,"updateCountDown");
             long curMs = System.currentTimeMillis();
-            long mTimerMSPre = mTimerMS;
+            long timerMSPre = mTimerMS;
             mTimerMS = mDataTimerDateEnd == 0?Long.MAX_VALUE: mDataTimerDateEnd - curMs;
-            long mTomatoMSPre = mTomatoMS;
+            long tomatoMSPre = mTomatoMS;
             mTomatoMS = mDataTomatoDateEnd == 0?Long.MAX_VALUE: mDataTomatoDateEnd - curMs;
 
-            if ((mDataTimerDateEnd!= 0 && mTimerMSPre/hourLengthInMS != mTimerMS/hourLengthInMS) ||
-                (mDataTomatoDateEnd!= 0 && mTomatoMSPre/hourLengthInMS != mTomatoMS/hourLengthInMS)) {
+            if ((mDataTimerDateEnd!= 0 && timerMSPre/hourLengthInMS != mTimerMS/hourLengthInMS) ||
+                (mDataTomatoDateEnd!= 0 && tomatoMSPre/hourLengthInMS != mTomatoMS/hourLengthInMS)) {
                 mUpdateFlag |= DRAW_HOUR;
                 mUpdateFlagAmbient |= DRAW_HOUR;
             }
 
+            if ((mDataTimerDateEnd!= 0 && timerMSPre/minLengthInMS != mTimerMS/minLengthInMS) ||
+                    (mDataTomatoDateEnd!= 0 && tomatoMSPre/minLengthInMS != mTomatoMS/minLengthInMS)) {
+                mUpdateFlag |= DRAW_MIN;
+                mUpdateFlagAmbient |= DRAW_MIN;
+            }
+
             //Log.d(TAG,"Update timer....");
-            if (mDataTomatoDateEnd!= 0 && mTomatoMSPre>0 && mTomatoMS<=0 && mTomatoMSPre != Long.MAX_VALUE)
+            if (mDataTomatoDateEnd!= 0 && tomatoMSPre>0 && mTomatoMS<=0 && tomatoMSPre != Long.MAX_VALUE)
             {
                 mUpdateFlag |= DRAW_MIN|DRAW_SEC;
                 mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
                 if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    mVibrator.vibrate(new long[]{10, 250, 200, 250}, -1);
+                    mVibrator.vibrate(new long[]{10, 500, 200, 500}, -1);
                 else
-                    mVibrator.vibrate(new long[]{10, 200, 500, 200, 200, 200}, -1);
-//                new Thread(){
-//                    @Override
-//                    public void run()
-//                    {
-//                        mVibrator.vibrate(new long[]{10, 100, 10, 100, 10, 100}, -1);
-//                    }
-//                }.start();
+                    mVibrator.vibrate(new long[]{10, 400, 200, 400, 500, 800}, -1);
             }
-            else if (mDataTimerDateEnd !=0 && mTimerMSPre>0 && mTimerMS<=0 && mTimerMSPre != Long.MAX_VALUE)
+            else if (mDataTimerDateEnd !=0 && timerMSPre>0 && mTimerMS<=0 && timerMSPre != Long.MAX_VALUE)
             {
                 mUpdateFlag |= DRAW_MIN|DRAW_SEC;
                 mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
-                mVibrator.vibrate(500);
-//                new Thread(){
-//                    @Override
-//                    public void run()
-//                    {
-//                        mVibrator.vibrate(500);
-//                    }
-//                }.start();
+                mVibrator.vibrate(new long[]{10, 800, 500, 400, 200, 400}, -1);
+
             }
         }
         /**
@@ -1755,6 +1870,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
             else {
                 updateCountDown();
             }
+        }
+
+        private void acquireWakeLock()
+        {
+            if(!mWakeLock.isHeld())
+                mWakeLock.acquire();
+        }
+
+        private void releaseWakeLock()
+        {
+            mWakeLock.release();
         }
 
         /**
@@ -1946,6 +2072,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mCacheLastUpeateHour = -1;
                     mCacheLastUpeateMin = -1;
                     mCacheLastUpeateAmbienHour = -1;
+                    fireTimer();
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_WORK)) {
                     mDataTomatoWork = config.getInt(configKey);
                 } else if (configKey.equals(WatchFaceUtil.KEY_TOMATO_RELAX)) {
@@ -2023,6 +2150,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     mCacheLastUpeateHour = -1;
                     mCacheLastUpeateMin = -1;
                     mCacheLastUpeateAmbienHour = -1;
+                    fireTomatoTimer();
                 } else {
                     Log.w(TAG, "Ignoring unknown config key: " + configKey);
                 }
@@ -2155,6 +2283,17 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     case MSG_UPDATE_TIME:
                         engine.handleUpdateTimeMessage();
                         break;
+                    case MSG_TOMATO:
+                    case MSG_TIMER:
+                        //engine.acquireWakeLock();
+                        engine.updateCountDown();
+                        engine.invalidate();
+                        //this.sendEmptyMessageDelayed(MSG_WAKELOCK_RELEASE,5000);
+
+                        break;
+
+                    case MSG_WAKELOCK_RELEASE:
+                        engine.releaseWakeLock();
                 }
             }
         }

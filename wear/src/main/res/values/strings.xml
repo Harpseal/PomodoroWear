@@ -12,6 +12,7 @@
     <string name="config_item_lv1_tomato">Pomodoro</string>
     <string name="config_item_lv1_timer">Timer</string>
     <string name="config_item_lv1_clear_event_queue">Clear Event Queue</string>
+    <string name="config_item_lv1_build_info">Build Info</string>
 
 
 
@@ -20,6 +21,7 @@
         <item>@string/config_item_lv1_tomato</item>
         <item>@string/config_item_lv1_timer</item>
         <item>@string/config_item_lv1_clear_event_queue</item>
+        <item>@string/config_item_lv1_build_info</item>
     </string-array>
 
 
@@ -69,5 +71,6 @@
     <string name="config_item_lv1_event_in_eqeue">events in queue</string>
     <string name="pomodoro_msg_short_minute">min</string>
     <string name="face_msg_event_sent">Event sent.</string>
+
 
 </resources>

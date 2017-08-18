@@ -3,13 +3,33 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '25.0.0'
 
-    defaultConfig {
-        applicationId "io.harpseal.pomodorowear"
-        minSdkVersion 21
-        targetSdkVersion 23
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+        versionProps['VERSION_CODE']=code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        defaultConfig {
+            applicationId "io.harpseal.pomodorowear"
+            versionCode code
+            versionName "1.0.0"
+            buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
+            minSdkVersion 21
+            targetSdkVersion 23
+        }
     }
+    else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -25,7 +45,7 @@ dependencies {
     compile 'com.android.support:support-v13:23.1.0'
     compile 'com.android.support:appcompat-v7:23.1.0'
 }
-
+/*
 import java.util.regex.Pattern
 
 task('increaseVersionCode') << {
@@ -60,3 +80,4 @@ tasks.whenTaskAdded { task ->
         task.dependsOn 'incrementVersionName'
     }
 }
+*/

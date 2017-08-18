@@ -38,7 +38,9 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 public class MainConfigActivity extends Activity implements
@@ -463,6 +465,32 @@ public class MainConfigActivity extends Activity implements
                         subTitle = "" + mTomatoEventQueue.size() + " " + getResources().getString(R.string.config_item_lv1_event_in_eqeue);
                     }
                     configItemViewHolder.mConfigItem.setSubLebelName(subTitle);
+                }
+
+                if (itemName.equals(getResources().getString(R.string.config_item_lv1_tomato)))
+                {
+                    String subTitle = "";
+                    subTitle += (mDataTomatoWork/60) + getResources().getString(R.string.face_msg_short_minute) + ",";
+                    subTitle += (mDataTomatoRelax/60) + getResources().getString(R.string.face_msg_short_minute) + ",";
+                    subTitle += (mDataTomatoRelaxLong/60) + getResources().getString(R.string.face_msg_short_minute);
+                    configItemViewHolder.mConfigItem.setSubLebelName(subTitle);
+                }
+
+                if (itemName.equals(getResources().getString(R.string.config_item_lv1_timer)))
+                {
+                    String subTitle = "";
+                    subTitle += (mDataTimer2/60) + getResources().getString(R.string.face_msg_short_minute) + ",";
+                    subTitle += (mDataTimer1/60) + getResources().getString(R.string.face_msg_short_minute) + ",";
+                    subTitle += (mDataTimer3/60) + getResources().getString(R.string.face_msg_short_minute) + ",";
+                    subTitle += (mDataTimer4/60) + getResources().getString(R.string.face_msg_short_minute);
+                    configItemViewHolder.mConfigItem.setSubLebelName(subTitle);
+                }
+
+                if (itemName.equals(getResources().getString(R.string.config_item_lv1_build_info)))
+                {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd.HHmm");
+                    Date buildDate = new Date(BuildConfig.TIMESTAMP);
+                    configItemViewHolder.mConfigItem.setSubLebelName(BuildConfig.VERSION_NAME + "." + BuildConfig.VERSION_CODE + "." + sdf.format(buildDate));
                 }
             }
             else if (mConfigType == ConfigType.CT_Calendar) {

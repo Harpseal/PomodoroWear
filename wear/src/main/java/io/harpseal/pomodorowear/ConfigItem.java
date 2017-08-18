@@ -182,7 +182,8 @@ public class ConfigItem extends LinearLayout implements
         IT_Factory,
         IT_Time,
         IT_Work,
-        IT_Reflash
+        IT_Reflash,
+        IT_Memory
 
     }
 
@@ -222,6 +223,10 @@ public class ConfigItem extends LinearLayout implements
                 mHeaderImage.setImageResource(R.drawable.ic_refresh_white_48px);
                 mHeaderImage.setCircleBorderColor(0);
                 break;
+            case IT_Memory:
+                mHeaderImage.setImageResource(R.drawable.ic_memory_48px);
+                mHeaderImage.setCircleBorderColor(0);
+                break;
         }
     }
 
@@ -231,6 +236,7 @@ public class ConfigItem extends LinearLayout implements
         String strTomato = getResources().getString(R.string.config_item_lv1_tomato);
         String strTimer = getResources().getString(R.string.config_item_lv1_timer);
         String strEventQueue = getResources().getString(R.string.config_item_lv1_clear_event_queue);
+        String strBuildInfo = getResources().getString(R.string.config_item_lv1_build_info);
         if (itemName.equals(strCal))
             setImage(ImageType.IT_Calendar);
         else if (itemName.equals(strTomato))
@@ -239,6 +245,8 @@ public class ConfigItem extends LinearLayout implements
             setImage(ImageType.IT_Alarm_clock);
         else if (itemName.equals(strEventQueue))
             setImage(ImageType.IT_Reflash);
+        else if (itemName.equals(strBuildInfo))
+            setImage(ImageType.IT_Memory);
     }
     public String getLebelName() {return mLabel.getText().toString();}
 

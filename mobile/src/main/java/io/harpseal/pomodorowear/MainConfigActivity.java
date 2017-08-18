@@ -49,6 +49,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +61,8 @@ public class MainConfigActivity extends PreferenceActivity implements
 
     private final static String TAG = "MainConfigActivity";
     //ListPreference mCalendarListPref;
+
+    Preference mPrefBuildInfo;
 
     Preference mPrefPomodoroCalendar;
     Preference mPrefPomodoroTags;
@@ -123,6 +126,12 @@ public class MainConfigActivity extends PreferenceActivity implements
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.preferences);
+
+        mPrefBuildInfo = findPreference("pref_key_build_info");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd.HHmm");
+        Date buildDate = new Date(BuildConfig.TIMESTAMP);
+        mPrefBuildInfo.setSummary(BuildConfig.VERSION_NAME + "." + BuildConfig.VERSION_CODE + "." + sdf.format(buildDate));
 
         mPrefPomodoroCalendar = findPreference("pref_key_pomodoro_calendar");
         mPrefPomodoroTags = findPreference("pref_key_pomodoro_tags");
