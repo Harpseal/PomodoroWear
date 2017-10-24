@@ -1373,7 +1373,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
                     //int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
                     float batteryRot = batteryLevel/100.f*(float) Math.PI + (float) Math.PI /2.f;
 
-                    if (mBatteryPredictionStartTime == 0 || mBatteryPredictionStartLevel < 0 || mBatteryPredictionCurrentLevel<batteryLevel-1)
+                    if (mBatteryPredictionStartTime == 0 || mBatteryPredictionStartLevel < 0 || mBatteryPredictionCurrentLevel<batteryLevel || batteryLevel == 100)
                     {
                         mBatteryPredictionStartTime = curTimeMS;
                         mBatteryPredictionStartLevel = batteryLevel;
@@ -1442,7 +1442,7 @@ public class MainWatchFace extends CanvasWatchFaceService {
 //                                String.format("%.2f %.0fhr",batteryLevel/mBatteryPredictionHourLeft,),
 //                                centerX,centerY + meterYShift + meterLengthSec/4);
                     }
-                    else if (mBatteryPredictionHourLeft < 0) {//☎
+                    else{// if (mBatteryPredictionHourLeft < 0) {//☎
                         if (mPhoneBattery>0)
                         {
                             drawTextCentred(tmpCanvas, mInteractionTextPaint, "\uD83D\uDD58"+ (int)batteryLevel + "%", centerX-meterLengthSec, centerY + meterYShift);
@@ -1841,21 +1841,49 @@ public class MainWatchFace extends CanvasWatchFaceService {
             }
 
             //Log.d(TAG,"Update timer....");
-            if (mDataTomatoDateEnd!= 0 && tomatoMSPre>0 && mTomatoMS<=0 && tomatoMSPre != Long.MAX_VALUE)
-            {
-                mUpdateFlag |= DRAW_MIN|DRAW_SEC;
-                mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
-                if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
-                    mVibrator.vibrate(new long[]{10, 500, 200, 500}, -1);
-                else
-                    mVibrator.vibrate(new long[]{10, 400, 200, 400, 500, 800}, -1);
-            }
-            else if (mDataTimerDateEnd !=0 && timerMSPre>0 && mTimerMS<=0 && timerMSPre != Long.MAX_VALUE)
-            {
-                mUpdateFlag |= DRAW_MIN|DRAW_SEC;
-                mUpdateFlagAmbient |= DRAW_MIN|DRAW_SEC;
-                mVibrator.vibrate(new long[]{10, 800, 500, 400, 200, 400}, -1);
+            long [] vibrate_array = null;
 
+            if (mDataTimerDateEnd !=0 && mTimerMS<=0 && timerMSPre != Long.MAX_VALUE)
+            {
+                if (timerMSPre>0) {
+                    mUpdateFlag |= DRAW_MIN | DRAW_SEC;
+                    mUpdateFlagAmbient |= DRAW_MIN | DRAW_SEC;
+                    vibrate_array = new long[]{10, 200, 200, 200, 200, 250};
+                }
+                else if (timerMSPre<0)
+                {
+                    long timerMinPre = -timerMSPre/minLengthInMS;
+                    long timerMinCur = -mTimerMS/minLengthInMS;
+                    if ((timerMinCur%5)==0 && (timerMinPre%5)!=0 && mDataTimerDateStart != mDataTimerDateEnd)//
+                        //Log.d(TAG,"vibrate timer....");
+                        vibrate_array = new long[]{10, 150};
+                }
+            }
+
+            if (mDataTomatoDateEnd!= 0 && mTomatoMS<=0 && tomatoMSPre != Long.MAX_VALUE)
+            {
+                if (tomatoMSPre>0) {
+                    mUpdateFlag |= DRAW_MIN | DRAW_SEC;
+                    mUpdateFlagAmbient |= DRAW_MIN | DRAW_SEC;
+                    if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
+                        vibrate_array =new long[]{10, 250, 200, 250};
+                    else
+                        vibrate_array = new long[]{10, 200, 200, 200, 500, 250};
+                }
+                else if (tomatoMSPre<0)
+                {
+                    long tomatoMinPre = -tomatoMSPre/minLengthInMS;
+                    long tomatoMinCur = -mTomatoMS/minLengthInMS;
+                    if ((tomatoMinCur%5)==0 && (tomatoMinPre%5)!=0 && !mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))//
+                        //Log.d(TAG,"vibrate timer....");
+                        vibrate_array = new long[]{10, 150};
+                }
+            }
+
+
+            if (vibrate_array != null)
+            {
+                mVibrator.vibrate(vibrate_array, -1);
             }
         }
         /**
