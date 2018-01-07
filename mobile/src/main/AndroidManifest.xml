@@ -16,36 +16,60 @@
         android:icon="@mipmap/icon_tomato_color"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <!--activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-->
+        android:theme="@style/AppTheme">
 
-        <service android:name=".MessageListenerService" >
+        <!-- <activity -->
+        <!-- android:name=".MainActivity" -->
+        <!-- android:label="@string/app_name" -->
+        <!-- android:theme="@style/AppTheme.NoActionBar"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
+
+        <service android:name=".MessageListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
 
-        <activity android:name=".MainConfigActivity"
+        <activity
+            android:name=".MainConfigActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" >
-            
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="io.harpseal.pomodorowear.CONFIG_CALENDAR" />
+
                 <category android:name="com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+                <!-- <action android:name="android.intent.action.MAIN" /> -->
+                <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainMobileSettingsActivity"
+            android:label="@string/title_activity_main_mobile_settings" />
+        <activity
+            android:name=".MainMobileTimerActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".TomatoBuilderActivity"></activity>
+
+        <receiver android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="play_tomato_alarm" />
+                <action android:name="play_tomato_warning" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -27,6 +27,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.wearable.companion.WatchFaceCompanion;
 import android.text.InputType;
 import android.text.format.DateFormat;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,9 +52,12 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainConfigActivity extends PreferenceActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -143,6 +147,37 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer3 = findPreference("pref_key_timer3");
         mPrefTimer4 = findPreference("pref_key_timer4");
 
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mDataTomatoWork = prefs.getInt(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
+        mPrefPomodoroTimerWork.setSummary("" + mDataTomatoWork / 60 + " min");
+
+        mDataTomatoRelax = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
+        mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax / 60 + " min");
+
+        mDataTomatoRelaxLong = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTomatoRelaxLong);
+        mPrefPomodoroTimerLongRelex.setSummary("" + mDataTomatoRelaxLong / 60 + " min");
+
+        mDataTimer1 = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTimer1);
+        mPrefTimer1.setSummary("" + mDataTimer1 / 60 + " min");
+
+        mDataTimer2 = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTimer2);
+        mPrefTimer2.setSummary("" + mDataTimer2 / 60 + " min");
+
+        mDataTimer3 = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTimer3);
+        mPrefTimer3.setSummary("" + mDataTimer3 / 60 + " min");
+
+        mDataTimer4 = prefs.getInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTimer4);
+        mPrefTimer4.setSummary("" + mDataTimer4 / 60 + " min");
+
+        mSelectedCalendarID = prefs.getLong(WatchFaceUtil.KEY_TOMATO_CALENDAR_ID,-1);
+        String calName = prefs.getString(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME,"");
+        if (calName.length() != 0)
+        {
+            mPrefPomodoroCalendar.setTitle(getResources().getString(R.string.perf_item_pomodoro_calendar) + " : " + calName);
+        }
+
+
         mPrefPomodoroCalendar.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -172,8 +207,9 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTomatoWork = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                if (mDataTomatoWork == 0) mDataTomatoWork = 1;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoWork);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
                                 mPrefPomodoroTimerWork.setSummary("" + mDataTomatoWork / 60 + " min");
 
                             }
@@ -194,8 +230,9 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTomatoRelax = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                if (mDataTomatoRelax == 0) mDataTomatoRelax = 1;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelax);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
                                 mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax / 60 + " min");
 
                             }
@@ -216,8 +253,9 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTomatoRelaxLong = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
+                                if (mDataTomatoRelaxLong == 0) mDataTomatoRelaxLong = 1;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelaxLong);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTomatoRelaxLong);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTomatoRelaxLong);
                                 mPrefPomodoroTimerLongRelex.setSummary("" + mDataTomatoRelaxLong / 60 + " min");
 
                             }
@@ -250,7 +288,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                         NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
                         mDataTimer1 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                         Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer1);
-                        sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
+                        sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
                         mPrefTimer1.setSummary("" + mDataTimer1 / 60 + " min");
 
                     }
@@ -272,7 +310,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTimer2 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer2);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER2,mDataTimer2);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER2,mDataTimer2);
                                 mPrefTimer2.setSummary("" + mDataTimer2 / 60 + " min");
 
                             }
@@ -294,7 +332,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTimer3 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer3);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER3, mDataTimer3);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER3, mDataTimer3);
                                 mPrefTimer3.setSummary("" + mDataTimer3 / 60 + " min");
 
                             }
@@ -316,7 +354,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTimer4 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer4);
-                                sendConfigUpdateMessage(WatchFaceUtil.KEY_TIMER4, mDataTimer4);
+                                sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER4, mDataTimer4);
                                 mPrefTimer4.setSummary("" + mDataTimer4 / 60 + " min");
 
                             }
@@ -334,7 +372,24 @@ public class MainConfigActivity extends PreferenceActivity implements
 
 
         mPromodoroTagList = new WatchFaceUtil.PomodoroTagList();
-        mPromodoroTagList.setByStringArray(WatchFaceUtil.DEFAULT_TOMATO_TAGS);
+
+
+        String prefTagsListString = prefs.getString(WatchFaceUtil.KEY_TOMATO_TAG_LIST, "");
+        if (prefTagsListString.length() != 0)
+        {
+            DataMap dataMap = DataMap.fromByteArray(Base64.decode(prefTagsListString, Base64.DEFAULT));
+            mPromodoroTagList.setByDataMapArray(dataMap.getDataMapArrayList(WatchFaceUtil.KEY_TOMATO_TAG_LIST));
+        }
+        else
+            mPromodoroTagList.setByStringArray(WatchFaceUtil.DEFAULT_TOMATO_TAGS);
+
+        //byte[] array = ;
+//        byt
+//        //sendConfigUpdateMessageDataMapArray(WatchFaceUtil.KEY_TOMATO_TAG_LIST, mPromodoroTagList.toDataMapArray());
+//        mPromodoroTagList.setByDataMapArray(config.getDataMapArrayList(configKey));
+//        mTagDynAdapter.setList(mPromodoroTagList);
+//        mTagDynAdapter.notifyDataSetChanged();
+//        uiUpdated = true;
 
 
         mTagDynAdapter = new DynamicArrayAdapter(this, R.layout.dyn_text_view, mPromodoroTagList);
@@ -401,7 +456,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                 .setView(mTagDynListView)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_TAG_LIST, mPromodoroTagList.toDataMapArray());
+                        sendConfigUpdateMessageDataMapArray(WatchFaceUtil.KEY_TOMATO_TAG_LIST, mPromodoroTagList.toDataMapArray());
                         dialog.dismiss();
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -461,11 +516,17 @@ public class MainConfigActivity extends PreferenceActivity implements
 
 
         mPeerId = getIntent().getStringExtra(WatchFaceCompanion.EXTRA_PEER_ID);
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Wearable.API)
-                .build();
+        if (mPeerId != null)
+        {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(Wearable.API)
+                    .build();
+        }
+        else
+            mGoogleApiClient = null;
+
 
 
     }
@@ -512,7 +573,8 @@ public class MainConfigActivity extends PreferenceActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
         updateCalendarListWrapper();
         Log.d(TAG,"onStart....");
     }
@@ -549,13 +611,13 @@ public class MainConfigActivity extends PreferenceActivity implements
             Log.d(TAG, "onConnected: " + connectionHint);
         }
 
-        if (mPeerId != null) {
+        if (mPeerId != null && mGoogleApiClient != null) {
             Uri.Builder builder = new Uri.Builder();
             Uri uri = builder.scheme("wear").path(WatchFaceUtil.PATH_WITH_FEATURE).authority(mPeerId).build();
             Log.d(TAG,"onConnected url: "+uri.toString());
             Wearable.DataApi.getDataItem(mGoogleApiClient, uri).setResultCallback(this);
 
-        } else {
+        } else if (mGoogleApiClient != null){
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -568,7 +630,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                     if (nodes.size() > 0) {
                         mPeerId = nodes.get(0).getId();
                         //if (nodes.size() > 1)
-                            Toast.makeText(getBaseContext(), "Connected to " + nodes.get(0).getDisplayName(), Toast.LENGTH_LONG).show();
+                        //    Toast.makeText(getBaseContext(), "Connected to " + nodes.get(0).getDisplayName(), Toast.LENGTH_LONG).show();
                         Uri.Builder builder = new Uri.Builder();
                         Uri uri = builder.scheme("wear").path(WatchFaceUtil.PATH_WITH_FEATURE).authority(mPeerId).build();
                         Log.d(TAG, "onConnected url: " + uri.toString());
@@ -792,8 +854,8 @@ public class MainConfigActivity extends PreferenceActivity implements
         alert.show();
     }
 
-    private void sendConfigUpdateMessage(String configKey, int value) {
-        if (mPeerId != null) {
+    private void sendConfigUpdateMessageInt(String configKey, int value) {
+        if (mPeerId != null && mGoogleApiClient != null) {
             DataMap config = new DataMap();
             config.putInt(configKey, value);
             byte[] rawData = config.toByteArray();
@@ -804,10 +866,15 @@ public class MainConfigActivity extends PreferenceActivity implements
                     + Integer.toHexString(value));
             // }
         }
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(configKey, value);
+        editor.commit();
     }
 
-    private void sendConfigUpdateMessage(String configKey, long value) {
-        if (mPeerId != null) {
+    private void sendConfigUpdateMessageLong(String configKey, long value) {
+        if (mPeerId != null && mGoogleApiClient != null) {
             DataMap config = new DataMap();
             config.putLong(configKey, value);
             byte[] rawData = config.toByteArray();
@@ -818,10 +885,16 @@ public class MainConfigActivity extends PreferenceActivity implements
                     + value);
             //}
         }
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(configKey, value);
+        editor.commit();
+
     }
 
-    private void sendConfigUpdateMessage(String configKey, String value) {
-        if (mPeerId != null) {
+    private void sendConfigUpdateMessageString(String configKey, String value) {
+        if (mPeerId != null && mGoogleApiClient != null) {
             DataMap config = new DataMap();
             config.putString(configKey, value);
             byte[] rawData = config.toByteArray();
@@ -833,11 +906,16 @@ public class MainConfigActivity extends PreferenceActivity implements
                     + value);
             //}
         }
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(configKey, value);
+        editor.commit();
     }
 
 
-    private void sendConfigUpdateMessage(String configKey, String[] array) {
-        if (mPeerId != null) {
+    private void sendConfigUpdateMessageStringArray(String configKey, String[] array) {
+        if (mPeerId != null && mGoogleApiClient != null) {
             DataMap config = new DataMap();
             config.putStringArray(configKey, array);
             byte[] rawData = config.toByteArray();
@@ -852,13 +930,19 @@ public class MainConfigActivity extends PreferenceActivity implements
             }
 //            }
         }
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        Set<String> value_set = new HashSet<String>(Arrays.asList(array));
+        editor.putStringSet(configKey, value_set);
+        editor.commit();
     }
 
-    private void sendConfigUpdateMessage(String configKey, ArrayList<DataMap> arrayMap) {
-        if (mPeerId != null) {
-            DataMap config = new DataMap();
-            config.putDataMapArrayList(configKey, arrayMap);
-            byte[] rawData = config.toByteArray();
+    private void sendConfigUpdateMessageDataMapArray(String configKey, ArrayList<DataMap> arrayMap) {
+        DataMap config = new DataMap();
+        config.putDataMapArrayList(configKey, arrayMap);
+        byte[] rawData = config.toByteArray();
+        if (mPeerId != null && mGoogleApiClient != null) {
             Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
 
 //            if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -869,16 +953,23 @@ public class MainConfigActivity extends PreferenceActivity implements
             }
 //            }
         }
+        //String saveThis = Base64.encodeToString(array, Base64.DEFAULT);
+        //byte[] array = Base64.decode(stringFromSharedPrefs, Base64.DEFAULT);
+        final SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(configKey, Base64.encodeToString(rawData, Base64.DEFAULT));
+        editor.commit();
     }
 
     private void sendCalendarConfigUpdateMessage()
     {
         if (mSelectedCalendarListIdx <0 ||mSelectedCalendarListIdx>=mCalendarList.size()) return;
 
-        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_CALENDAR_ID,  mCalendarList.get(mSelectedCalendarListIdx).id);
-        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME,  mCalendarList.get(mSelectedCalendarListIdx).name);
-        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_CALENDAR_COLOR,  mCalendarList.get(mSelectedCalendarListIdx).color);
-        sendConfigUpdateMessage(WatchFaceUtil.KEY_TOMATO_CALENDAR_ACCOUNT_NAME,  mCalendarList.get(mSelectedCalendarListIdx).accountName);
+        sendConfigUpdateMessageLong(WatchFaceUtil.KEY_TOMATO_CALENDAR_ID,  mCalendarList.get(mSelectedCalendarListIdx).id);
+        sendConfigUpdateMessageString(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME,  mCalendarList.get(mSelectedCalendarListIdx).name);
+        sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_CALENDAR_COLOR,  mCalendarList.get(mSelectedCalendarListIdx).color);
+        sendConfigUpdateMessageString(WatchFaceUtil.KEY_TOMATO_CALENDAR_ACCOUNT_NAME,  mCalendarList.get(mSelectedCalendarListIdx).accountName);
 
     }
 
@@ -1040,10 +1131,14 @@ public class MainConfigActivity extends PreferenceActivity implements
                     calMapList.add(map);
                 } while (calCursor.moveToNext());
 
-                DataMap calMap = new DataMap();
-                calMap.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST, calMapList);
-                byte[] rawData = calMap.toByteArray();
-                Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+                if (mPeerId != null && mGoogleApiClient != null)
+                {
+                    DataMap calMap = new DataMap();
+                    calMap.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST, calMapList);
+                    byte[] rawData = calMap.toByteArray();
+                    Wearable.MessageApi.sendMessage(mGoogleApiClient, mPeerId, WatchFaceUtil.PATH_WITH_FEATURE, rawData);
+                }
+
 
                 Log.d("uploadCalendarList", "Sent watch face config message: " + WatchFaceUtil.KEY_TOMATO_CALENDAR_LIST);
                 for (DataMap map : calMapList)

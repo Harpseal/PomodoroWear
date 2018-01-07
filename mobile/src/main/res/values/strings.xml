@@ -1,10 +1,23 @@
 <resources>
-    <string name="app_name">PomodoroWear</string>
+    <string name="app_name">Pomodoro</string>
     <string name="action_settings">Settings</string>
 
     <string name="title_no_device_connected">No wearable device is currently connected.</string>
     <string name="ok_no_device_connected">OK</string>
     <string name="title_activity_moblie_config">Settings</string>
+
+    <string name="text_builder_time_start">開始</string>
+    <string name="text_builder_time_end">結束</string>
+    <string name="text_builder_time_to">到</string>
+    <string name="text_builder_finish_alarm">確定要放棄?</string>
+    <string name="text_builder_finish_alarm_ok">確定</string>
+    <string name="text_builder_finish_alarm_cancel">取消</string>
+
+    <string name="text_timer_mode_idle"></string>
+    <string name="text_timer_mode_out_of_time">超時</string>
+    <string name="text_timer_mode_work">工作中</string>
+    <string name="text_timer_mode_relax">休息中</string>
+    <string name="text_timer_mode_relax_long">長休息中</string>
 
     <!-- Strings related to Settings -->
 
@@ -54,6 +67,7 @@
 
 
     <!-- Example settings for Notifications -->
+    <string name="perf_category_software_information">Software Information</string>
     <string name="perf_category_pomodoro">Pomodoro Configuration</string>
 
     <string name="perf_screen_pomodoro_timer">Pomodoro Timers</string>
@@ -78,7 +92,33 @@
     <string name="perf_item_build_info">版本資訊</string>
 
     <string name="dialog_tag_editor_is_default_checked">預設選取</string>
+    <string name="title_activity_main_mobile_settings">Pomodoro Settings</string>
 
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
 
 
 </resources>

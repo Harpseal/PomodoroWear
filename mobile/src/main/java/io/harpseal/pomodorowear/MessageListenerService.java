@@ -101,7 +101,7 @@ public class MessageListenerService extends WearableListenerService {
         Toast.makeText(this, "" + mNumberOfMessage + " : " + message, Toast.LENGTH_LONG).show();
     }
 
-    private class EventItem
+    public class EventItem
     {
         public long start;
         public long end;
