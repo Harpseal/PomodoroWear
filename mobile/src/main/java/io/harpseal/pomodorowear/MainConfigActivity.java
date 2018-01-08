@@ -1038,7 +1038,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                     cal.setTimeInMillis(eventEnd);
                     String strEventEnd = DateFormat.format("YY MM dd HH:mm:ss", cal).toString();
 
-                    Log.i("MainActivity","event calid:" + id + "  title :" + title + "  des:" + description + "  time:" + strEventStart + " -> " + strEventEnd);
+                    //Log.i("MainActivity","event calid:" + id + "  title :" + title + "  des:" + description + "  time:" + strEventStart + " -> " + strEventEnd);
 
                 } while (eventCursor.moveToNext());
             }
@@ -1117,7 +1117,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                     //String accType = calCursor.getString(3);
                     String accLevel = calCursor.getString(4);
                     int color = calCursor.getInt(5);
-                    Log.i("MainActivity","id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
+                    //Log.i("MainActivity","id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
 
                     mCalendarList.add(new CalendarItem(id,displayName,accName,color));
                     //

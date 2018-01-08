@@ -229,7 +229,7 @@ public class MessageListenerService extends WearableListenerService {
                 Uri.Builder builder = new Uri.Builder();
                 Uri uri = builder.scheme("wear").path(WatchFaceUtil.PATH_WITH_FEATURE).authority(nodeId).build();
                 Log.d(TAG, "onConnected url: " + uri.toString());
-                DataApi.DataItemResult dataItemResult = Wearable.DataApi.getDataItem(client, uri).await();//.setResultCallback(MainActivity.this);
+                DataApi.DataItemResult dataItemResult = Wearable.DataApi.getDataItem(client, uri).await();
 
                 if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
                     DataItem configDataItem = dataItemResult.getDataItem();
@@ -322,7 +322,7 @@ public class MessageListenerService extends WearableListenerService {
                         {
                             DataMap configReturn = new DataMap();
                             configReturn.putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE, eventQueue);
-                            //PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.getDataItem(client, configReturn.as);//.setResultCallback(MainActivity.this);
+                            //PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.getDataItem(client, configReturn.as);//
 
 //                            PutDataMapRequest dataMap = PutDataMapRequest.create(WatchFaceUtil.PATH_WITH_FEATURE);
 //                            dataMap.getDataMap().putDataMapArrayList(WatchFaceUtil.KEY_TOMATO_EVENT_QUEUE, eventQueue);
@@ -422,7 +422,7 @@ public class MessageListenerService extends WearableListenerService {
                         //String accType = calCursor.getString(3);
                         String accLevel = calCursor.getString(4);
                         int color = calCursor.getInt(5);
-                        Log.i("MainActivity", "id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
+                        //Log.i("MainActivity", "id :" + id + "  name :" + displayName + "  accLevel:" + accLevel + "  color:" + Integer.toHexString(color));
 
 
                         DataMap map = new DataMap();

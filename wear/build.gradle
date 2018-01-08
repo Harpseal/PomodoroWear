@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 26
     //buildToolsVersion '25.0.0'
 
     def versionPropsFile = file('version.properties')
@@ -24,10 +24,11 @@ android {
             buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
             minSdkVersion 21
             targetSdkVersion 23
+            multiDexEnabled true
         }
     }
     else {
-        throw new GradleException("Could not read version.properties!")
+        //throw new GradleException("Could not read version.properties!")
     }
 
     buildTypes {
@@ -40,10 +41,17 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:1.3.0'
-    compile 'com.google.android.gms:play-services-wearable:8.1.0'
-    compile 'com.android.support:support-v13:23.1.0'
-    compile 'com.android.support:appcompat-v7:23.1.0'
+    //compile 'com.google.android.support:wearable:1.3.0'
+    compile 'com.google.android.support:wearable:2.1.0'
+    //provided 'com.google.android.wearable:wearable:2.1.0'
+
+    //compile 'com.google.android.gms:play-services-wearable:8.1.0'
+    compile 'com.google.android.gms:play-services-wearable:11.0.4'
+
+    //compile 'com.android.support:support-v13:23.1.0'
+    //compile 'com.android.support:appcompat-v7:23.1.0'
+    compile 'com.android.support:support-v13:26.0.2'
+    compile 'com.android.support:appcompat-v7:26.0.2'
 }
 /*
 import java.util.regex.Pattern

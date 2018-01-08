@@ -105,7 +105,7 @@ public class MainMobileTimerActivity extends Activity {
 
     }
 
-    private void updateTimer()
+    private void updateTimer(boolean isUpdateProgressBar)
     {
         Long timeInMillis = System.currentTimeMillis();
         int progressPre = mProgressBar.getProgress();
@@ -165,7 +165,7 @@ public class MainMobileTimerActivity extends Activity {
         }
         Log.d(TAG,"updateTimer " + (progressPre/100) + " -> " + progressCur);
 
-        if (progressCur != (progressPre/100))
+        if (isUpdateProgressBar && progressCur != (progressPre/100))
         {
             //if (Math.abs(progressCur - progressPre) > 1)
             {
@@ -317,7 +317,10 @@ public class MainMobileTimerActivity extends Activity {
             {
                 long diffPre = (mDataTomatoDateEnd - mDataTomatoDateStart)/1000;
                 if (!mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE) && diffPre > 0) {
-                    changeProgressBarMode(ProgressMode.NORMAL);
+                    if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
+                        changeProgressBarMode(ProgressMode.NORMAL);
+                    else
+                        changeProgressBarMode(ProgressMode.WARNING);
                     mDataTomatoDateStart = timeInMillis + startDelay;
                     mDataTomatoDateEnd = mDataTomatoDateStart + (diffPre) * 1000;
                     isModifiedConfig = true;
@@ -371,7 +374,7 @@ public class MainMobileTimerActivity extends Activity {
                 editor.putString(WatchFaceUtil.KEY_TOMATO_TYPE,mTomatoType);
                 editor.commit();
                 updateModeText("","");
-                updateTimer();
+                updateTimer(false);
 
                 if (mDataTomatoDateEnd != 0 && !mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)) {
                     Intent intent = new Intent(this, AlarmReceiver.class);
@@ -459,7 +462,7 @@ public class MainMobileTimerActivity extends Activity {
             mTextCal.setText("--");
         }
         updateModeText("","");
-        updateTimer();
+        updateTimer(false);
 
         if (!mActivityPostDelayRunning) {
             mActivityPostDelayRunning = true;
@@ -467,7 +470,7 @@ public class MainMobileTimerActivity extends Activity {
             rootView.postDelayed(new Runnable() {
                 public void run() {
                     if (mActivityShowed) {
-                        updateTimer();
+                        updateTimer(true);
                         rootView.postDelayed(this, 1000);
                     }
                     else {
