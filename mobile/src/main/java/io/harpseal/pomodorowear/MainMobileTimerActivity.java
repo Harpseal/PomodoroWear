@@ -3,6 +3,7 @@ package io.harpseal.pomodorowear;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class MainMobileTimerActivity extends Activity {
@@ -105,7 +107,7 @@ public class MainMobileTimerActivity extends Activity {
 
     }
 
-    private void updateTimer(boolean isUpdateProgressBar)
+    private void updateTimer(boolean isUpdateProgressBar, boolean enableProgressBarAnimation)
     {
         Long timeInMillis = System.currentTimeMillis();
         int progressPre = mProgressBar.getProgress();
@@ -122,7 +124,7 @@ public class MainMobileTimerActivity extends Activity {
             mTextSec.setText(sdfmin.format(dateNow));
 
             changeProgressBarMode(ProgressMode.NORMAL);
-            progressCur = 0;
+            progressCur = (Calendar.getInstance().get(Calendar.SECOND)*100)/60;
 
             long timeInSec = timeInMillis/1000;
             if ((timeInSec & 1) != 0)
@@ -167,15 +169,15 @@ public class MainMobileTimerActivity extends Activity {
 
         if (isUpdateProgressBar && progressCur != (progressPre/100))
         {
-            //if (Math.abs(progressCur - progressPre) > 1)
+            if (enableProgressBarAnimation)
             {
                 ObjectAnimator animation = ObjectAnimator.ofInt (mProgressBar, "progress", progressPre, progressCur*100); // see this max value coming back here, we animale towards that value
                 animation.setDuration (800); //in milliseconds
                 animation.setInterpolator (new DecelerateInterpolator());
                 animation.start ();
             }
-//            else
-//                mProgressBar.setProgress(progressCur);
+            else
+                mProgressBar.setProgress(progressCur);
         }
 
         mDataTomatoTimeInMillisPre = timeInMillis;
@@ -273,10 +275,9 @@ public class MainMobileTimerActivity extends Activity {
                 dtend = timeInMillis;
             }
 
-            final int startDelay = 1500;
+            final int startDelay = 1100;
             if (v == mBtnStop)
             {
-
                 mDataTomatoDateStart = mDataTomatoDateEnd = 0;
                 mTomatoType = WatchFaceUtil.KEY_TOMATO_IDLE;
                 isModifiedConfig = true;
@@ -299,6 +300,9 @@ public class MainMobileTimerActivity extends Activity {
                 } catch (Exception e) {
                     Log.e(TAG, "AlarmManager update was not canceled. " + e.toString());
                 }
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.cancelAll();
 
             }
             else if (v == mBtnPlay && (mDataTomatoDateStart == 0 || mDataTomatoDateEnd == 0 || mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)))
@@ -374,11 +378,12 @@ public class MainMobileTimerActivity extends Activity {
                 editor.putString(WatchFaceUtil.KEY_TOMATO_TYPE,mTomatoType);
                 editor.commit();
                 updateModeText("","");
-                updateTimer(false);
+                updateTimer(false, false);
 
                 if (mDataTomatoDateEnd != 0 && !mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)) {
                     Intent intent = new Intent(this, AlarmReceiver.class);
-                    intent.putExtra("msg", "play_tomato_alarm");
+                    intent.putExtra("msg",
+                            mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK) ? "play_tomato_warning" : "play_tomato_alarm");
 
                     PendingIntent pi = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -462,7 +467,7 @@ public class MainMobileTimerActivity extends Activity {
             mTextCal.setText("--");
         }
         updateModeText("","");
-        updateTimer(false);
+        updateTimer(true, false);
 
         if (!mActivityPostDelayRunning) {
             mActivityPostDelayRunning = true;
@@ -470,7 +475,7 @@ public class MainMobileTimerActivity extends Activity {
             rootView.postDelayed(new Runnable() {
                 public void run() {
                     if (mActivityShowed) {
-                        updateTimer(true);
+                        updateTimer(true, true);
                         rootView.postDelayed(this, 1000);
                     }
                     else {
@@ -500,17 +505,21 @@ public class MainMobileTimerActivity extends Activity {
             case WatchFaceUtil.KEY_TOMATO_WORK:
                 mTextCal.setVisibility(View.VISIBLE);
                 mTextCalPrefix.setVisibility(View.VISIBLE);
-                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_work)+ postfix);
+                mTextType.setText(prefix +
+                        getResources().getString(R.string.text_timer_mode_work) +
+                        getResources().getString(R.string.text_timer_postfix_doing) + postfix);
                 break;
             case WatchFaceUtil.KEY_TOMATO_RELAX:
                 mTextCal.setVisibility(View.VISIBLE);
                 mTextCalPrefix.setVisibility(View.VISIBLE);
-                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_relax)+ postfix);
+                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_relax) +
+                        getResources().getString(R.string.text_timer_postfix_doing) + postfix);
                 break;
             case WatchFaceUtil.KEY_TOMATO_RELAX_LONG:
                 mTextCal.setVisibility(View.VISIBLE);
                 mTextCalPrefix.setVisibility(View.VISIBLE);
-                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_relax_long)+ postfix);
+                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_relax_long) +
+                        getResources().getString(R.string.text_timer_postfix_doing) + postfix);
                 break;
 
             case WatchFaceUtil.KEY_TOMATO_IDLE:

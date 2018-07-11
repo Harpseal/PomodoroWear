@@ -40,3 +40,6 @@ proguard/
 # Android Studio captures folder
 captures/
 mobile/src/main/java/io/harpseal/pomodorowear/WatchFaceUtil.java
+
+.idea/caches/
+release/output.json

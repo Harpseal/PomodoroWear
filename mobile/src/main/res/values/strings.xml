@@ -15,9 +15,10 @@
 
     <string name="text_timer_mode_idle"></string>
     <string name="text_timer_mode_out_of_time">超時</string>
-    <string name="text_timer_mode_work">工作中</string>
-    <string name="text_timer_mode_relax">休息中</string>
-    <string name="text_timer_mode_relax_long">長休息中</string>
+    <string name="text_timer_mode_work">工作</string>
+    <string name="text_timer_mode_relax">休息</string>
+    <string name="text_timer_mode_relax_long">長休息</string>
+    <string name="text_timer_postfix_doing">中</string>
 
     <!-- Strings related to Settings -->
 
