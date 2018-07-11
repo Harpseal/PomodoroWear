@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -26,9 +27,6 @@ import java.util.Date;
 public class AlarmReceiver extends BroadcastReceiver
 {
     final String TAG = AlarmReceiver.class.getName();
-
-    public final String NOTIFICATION_ID = TAG + "-notification-id";
-    public final String NOTIFICATION = TAG + "-notification";
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -74,24 +72,20 @@ public class AlarmReceiver extends BroadcastReceiver
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
                     timerIntent, 0);
 
+            int iconID = R.mipmap.icon_tomato_color;
             Notification notification = new Notification.Builder(context)
                     //.setPriority(NotificationManager.IMPORTANCE_HIGH)
                     .setContentIntent(pendingIntent)
                     .setContentTitle(noTitle)
                     .setContentText(noText)
-                    .setSmallIcon(R.mipmap.icon_tomato_color)
+                    .setSmallIcon(iconID)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),iconID))
                     .setDefaults(Notification.DEFAULT_ALL)
                     .setPriority(Notification.PRIORITY_HIGH)
                     .build();
-
-//            NotificationChannel chan2 = new NotificationChannel(NOTIFICATION_ID,
-//                    NOTIFICATION, NotificationManager.IMPORTANCE_HIGH);
-////            chan2.setLightColor(Color.BLUE);
-////            chan2.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-//            mNotificationManager.createNotificationChannel(chan2);
-
+            mNotificationManager.cancel(WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID,1);
             mNotificationManager.notify(
-                    NOTIFICATION_ID,0,  // <-- Place your notification id here
+                    WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID,0,  // <-- Place your notification id here
                     notification);
         }
 

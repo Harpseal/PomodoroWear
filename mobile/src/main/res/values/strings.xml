@@ -13,7 +13,7 @@
     <string name="text_builder_finish_alarm_ok">確定</string>
     <string name="text_builder_finish_alarm_cancel">取消</string>
 
-    <string name="text_timer_mode_idle"></string>
+    <string name="text_timer_mode_idle">閒置</string>
     <string name="text_timer_mode_out_of_time">超時</string>
     <string name="text_timer_mode_work">工作</string>
     <string name="text_timer_mode_relax">休息</string>

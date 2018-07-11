@@ -21,8 +21,8 @@ android {
             versionCode code
             versionName "1.0.0"
             buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
-            minSdkVersion 21
-            targetSdkVersion 23
+            minSdkVersion 24
+            targetSdkVersion 24
             multiDexEnabled true
         }
     } else {

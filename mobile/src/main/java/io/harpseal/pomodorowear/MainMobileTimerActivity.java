@@ -3,26 +3,35 @@ package io.harpseal.pomodorowear;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.shapes.Shape;
+import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
+import android.service.notification.StatusBarNotification;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -52,6 +61,10 @@ public class MainMobileTimerActivity extends Activity {
     private TextView mTextSec;
     private TextView mTextCenter;
 
+    private long mDataTomatoPowerUpdated;
+    private ImageView mImagePower;
+    //private TextView mTextMinAndSec;
+
     ProgressBar mProgressBar;
 
     private String mTomatoType = WatchFaceUtil.DEFAULT_TOMATO_TYPE;
@@ -72,6 +85,9 @@ public class MainMobileTimerActivity extends Activity {
     private boolean mActivityShowed = false;
     private boolean mActivityPostDelayRunning = false;
 
+    AlarmManager mAlarmManager = null;
+    NotificationManager mNotificationManager = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,12 +104,19 @@ public class MainMobileTimerActivity extends Activity {
         mTextType = findViewById(R.id.textview_mode);
         mTextMin = findViewById(R.id.textview_time_min);
         mTextSec = findViewById(R.id.textview_time_sec);
+        //mTextMinAndSec = findViewById(R.id.textview_time_min_sec);
+
         mTextCenter = findViewById(R.id.textview_center_2);
+
+        mDataTomatoPowerUpdated = System.currentTimeMillis();
+        mImagePower = findViewById(R.id.image_power);
 
         mProgressBar = findViewById(R.id.circularProgressBar);
         mProgressBar.setProgress(0);
 
 
+        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         //getActionBar().hide();
 
 //        LayerDrawable progDrawable= (LayerDrawable)progressBar.getProgressDrawable();
@@ -112,6 +135,7 @@ public class MainMobileTimerActivity extends Activity {
         Long timeInMillis = System.currentTimeMillis();
         int progressPre = mProgressBar.getProgress();
         int progressCur = progressPre;
+        String strMin = "00",strSec = "00";
         if (mDataTomatoDateStart == 0 || mDataTomatoDateEnd == 0 || mDataTomatoDateEnd == mDataTomatoDateStart)
         {
 //            time_min = mDataTomatoWork % 60;
@@ -120,8 +144,9 @@ public class MainMobileTimerActivity extends Activity {
             SimpleDateFormat sdfhour = new SimpleDateFormat("HH");
             SimpleDateFormat sdfmin = new SimpleDateFormat("mm");
             Date dateNow = new Date(timeInMillis);
-            mTextMin.setText(sdfhour.format(dateNow) );
-            mTextSec.setText(sdfmin.format(dateNow));
+
+            strMin = sdfhour.format(dateNow);
+            strSec = sdfmin.format(dateNow);
 
             changeProgressBarMode(ProgressMode.NORMAL);
             progressCur = (Calendar.getInstance().get(Calendar.SECOND)*100)/60;
@@ -131,6 +156,7 @@ public class MainMobileTimerActivity extends Activity {
                 mTextCenter.setAlpha(0.5f);
             else
                 mTextCenter.setAlpha(1.0f);
+
         }
         else
         {
@@ -162,10 +188,41 @@ public class MainMobileTimerActivity extends Activity {
             else
                 mTextCenter.setAlpha(1.0f);
 
-            mTextMin.setText(String.format("%02d",time_min));
-            mTextSec.setText(String.format("%02d",time_sec));
+            strMin = String.format("%02d",time_min);
+            strSec = String.format("%02d",time_sec);
+
         }
-        Log.d(TAG,"updateTimer " + (progressPre/100) + " -> " + progressCur);
+
+        if (strMin.length()>=4)
+        {
+            strMin = "999";
+            strSec = "59";
+        }
+
+        mTextMin.setText(strMin);
+        mTextSec.setText(strSec);
+
+//        if (strMin.length() >= 2)
+//        {
+//            mTextMinAndSec.setText(strMin+":"+strSec);
+//            mTextCenter.setVisibility(View.INVISIBLE);
+//            mTextMin.setVisibility(View.INVISIBLE);
+//            mTextSec.setVisibility(View.INVISIBLE);
+//            mTextMinAndSec.setVisibility(View.VISIBLE);
+//        }
+//        else
+//        {
+//            mTextMin.setText(strMin);
+//            mTextSec.setText(strSec);
+//            mTextCenter.setVisibility(View.VISIBLE);
+//            mTextMin.setVisibility(View.VISIBLE);
+//            mTextSec.setVisibility(View.VISIBLE);
+//            mTextMinAndSec.setVisibility(View.INVISIBLE);
+//        }
+
+        if (timeInMillis - mDataTomatoPowerUpdated > 2 * 60 * 1000)//5 min/check
+            updatePowerStatus();
+        Log.d(TAG,"updateTimer " + (progressPre/100) + " -> " + progressCur + " " + (timeInMillis - mDataTomatoPowerUpdated));
 
         if (isUpdateProgressBar && progressCur != (progressPre/100))
         {
@@ -201,6 +258,21 @@ public class MainMobileTimerActivity extends Activity {
 //                break;
 //        }
 
+    }
+
+    private void updatePowerStatus()
+    {
+        boolean isScreenOn = isPowerConnected(this);
+        Log.d(TAG,"isPowerConnected " + isScreenOn);
+        if (isScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            mImagePower.setVisibility(View.VISIBLE);
+        }
+        else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            mImagePower.setVisibility(View.INVISIBLE);
+        }
+        mDataTomatoPowerUpdated = System.currentTimeMillis();
     }
 
     private void changeProgressBarMode(ProgressMode mode)
@@ -265,6 +337,8 @@ public class MainMobileTimerActivity extends Activity {
             Long timeInMillis = System.currentTimeMillis();
             boolean isModifiedConfig = false;
 
+
+
             long dtstart,dtend;
             dtstart = 0;
             dtend = 0;
@@ -276,6 +350,7 @@ public class MainMobileTimerActivity extends Activity {
             }
 
             final int startDelay = 1100;
+
             if (v == mBtnStop)
             {
                 mDataTomatoDateStart = mDataTomatoDateEnd = 0;
@@ -291,19 +366,14 @@ public class MainMobileTimerActivity extends Activity {
                 Intent updateServiceIntent = new Intent(this, AlarmReceiver.class);
                 PendingIntent pendingUpdateIntent = PendingIntent.getService(this, 0, updateServiceIntent, 0);
 
-                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
                 // Cancel alarms
                 try {
-                    alarmManager.cancel(pendingUpdateIntent);
+                    mAlarmManager.cancel(pendingUpdateIntent);
                     Log.d(TAG, "AlarmManager update was canceled. ");
                 } catch (Exception e) {
                     Log.e(TAG, "AlarmManager update was not canceled. " + e.toString());
                 }
-
-                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancelAll();
-
+                mNotificationManager.cancelAll();
             }
             else if (v == mBtnPlay && (mDataTomatoDateStart == 0 || mDataTomatoDateEnd == 0 || mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)))
             {
@@ -316,6 +386,7 @@ public class MainMobileTimerActivity extends Activity {
                 mBtnStop.setVisibility(View.VISIBLE);
                 mBtnPrevious.setVisibility(View.VISIBLE);
                 mBtnNext.setVisibility(View.VISIBLE);
+
             }
             else if (v == mBtnPrevious)
             {
@@ -380,6 +451,7 @@ public class MainMobileTimerActivity extends Activity {
                 updateModeText("","");
                 updateTimer(false, false);
 
+
                 if (mDataTomatoDateEnd != 0 && !mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)) {
                     Intent intent = new Intent(this, AlarmReceiver.class);
                     intent.putExtra("msg",
@@ -387,9 +459,14 @@ public class MainMobileTimerActivity extends Activity {
 
                     PendingIntent pi = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
-                    AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                    am.set(AlarmManager.RTC_WAKEUP, mDataTomatoDateEnd, pi);
+                    //AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, mDataTomatoDateEnd, pi);
+
+                    updateNotification();
                 }
+
+
+
             }
 
             if (mSelectedCalendarID != -1 && dtstart!=0 && dtend>=dtstart)
@@ -412,6 +489,16 @@ public class MainMobileTimerActivity extends Activity {
             }
 
         }
+    }
+
+    public static boolean isPowerConnected(Context context) {
+        Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        //return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+        return plugged == BatteryManager.BATTERY_PLUGGED_AC ||
+                plugged == BatteryManager.BATTERY_PLUGGED_USB ||
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS);
+
     }
 
     @Override
@@ -467,7 +554,8 @@ public class MainMobileTimerActivity extends Activity {
             mTextCal.setText("--");
         }
         updateModeText("","");
-        updateTimer(true, false);
+        //updateTimer(true, false);
+        updateTimer(false, false);
 
         if (!mActivityPostDelayRunning) {
             mActivityPostDelayRunning = true;
@@ -485,16 +573,93 @@ public class MainMobileTimerActivity extends Activity {
                 }
             }, 1000);
         }
+        if (mTomatoType != WatchFaceUtil.KEY_TOMATO_IDLE)
+            updateNotification();
+
+        updatePowerStatus();
     }
     @Override
     public void onPause() {
         Log.d(TAG,"onPause");
         super.onPause();
         mActivityShowed = false;
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     @Override
     public void onStop() {
         super.onStop();
+
+    }
+
+    private boolean isNotificationVisible(int checkid) {
+        StatusBarNotification[] notifications = mNotificationManager.getActiveNotifications();
+        for (StatusBarNotification notification : notifications) {
+            if (notification.getId() == checkid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void updateNotification()
+    {
+        if (mDataTomatoDateStart == mDataTomatoDateEnd) return;
+
+        int statTextID = mTomatoType == WatchFaceUtil.KEY_TOMATO_WORK? R.string.text_timer_mode_work :
+                         mTomatoType == WatchFaceUtil.KEY_TOMATO_RELAX ? R.string.text_timer_mode_relax :
+                         mTomatoType == WatchFaceUtil.KEY_TOMATO_RELAX_LONG ? R.string.text_timer_mode_relax : R.string.text_timer_mode_idle;
+
+        Long timeInMillis = System.currentTimeMillis();
+        SimpleDateFormat timeTxtFormat = new SimpleDateFormat("HH:mm:ss");
+        String noTitle, noText;
+        int iconID;
+        if (mDataTomatoDateEnd<timeInMillis)
+        {
+            iconID = R.mipmap.icon_tomato_color;
+            noTitle = getResources().getString(R.string.text_timer_mode_out_of_time) +
+                    getResources().getString(R.string.text_timer_mode_relax) +
+                    getResources().getString(R.string.text_timer_postfix_doing);
+            noText = getResources().getString(R.string.text_timer_mode_relax) +
+                    getResources().getString(R.string.text_builder_time_end) + " @ " + timeTxtFormat.format(new Date(mDataTomatoDateEnd));
+        }
+        else {
+            iconID = R.mipmap.icon_tomato_color_light;
+            noTitle = getResources().getString(statTextID) +
+                    getResources().getString(R.string.text_timer_postfix_doing);
+            noText = getResources().getString(statTextID) +
+                    getResources().getString(R.string.text_builder_time_start) + " @ " + timeTxtFormat.format(new Date(mDataTomatoDateStart)) + "  ⇨  " +
+                    getResources().getString(R.string.text_builder_time_end) + " @ " + timeTxtFormat.format(new Date(mDataTomatoDateEnd));
+        }
+
+        Intent timerIntent = new Intent(this, io.harpseal.pomodorowear.MainMobileTimerActivity.class);
+        timerIntent.setAction(Intent.ACTION_MAIN);
+        timerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                timerIntent, 0);
+
+//        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
+//        contentView.setImageViewResource(R.id.image, iconID);
+//        contentView.setTextViewText(R.id.title, noTitle);
+//        contentView.setTextViewText(R.id.text, noText);
+
+        Notification notification = new Notification.Builder(this)
+                //.setPriority(NotificationManager.IMPORTANCE_HIGH)
+                //.setCustomContentView(contentView)
+                .setContentIntent(pendingIntent)
+                .setContentTitle(noTitle)
+                .setContentText(noText)
+                .setSmallIcon(iconID)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),iconID))
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setVibrate(new long[]{0L}) // Passing null here silently fails
+                .setPriority(Notification.PRIORITY_HIGH)
+                .build();
+
+        mNotificationManager.cancel(WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID, 0);
+        mNotificationManager.notify(
+                WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID, 1,  // <-- Place your notification id here
+                notification);
 
     }
 
@@ -526,7 +691,8 @@ public class MainMobileTimerActivity extends Activity {
             default:
                 mTextCal.setVisibility(View.GONE);
                 mTextCalPrefix.setVisibility(View.GONE);
-                mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_idle)+ postfix);
+                //mTextType.setText(prefix + getResources().getString(R.string.text_timer_mode_idle)+ postfix);
+                mTextType.setText("");
                 break;
         }
     }
