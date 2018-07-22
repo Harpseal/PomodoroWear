@@ -9,38 +9,28 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
-
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 public class TomatoBuilderActivity extends Activity {
     final String TAG = TomatoBuilderActivity.class.getName();
@@ -101,6 +91,7 @@ public class TomatoBuilderActivity extends Activity {
 
         ArrayList<String> tag_list = new ArrayList<String>();
 
+        boolean isSetTag = false;
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String prefTagsListString = prefs.getString(WatchFaceUtil.KEY_TOMATO_TAG_LIST, "");
         if (prefTagsListString.length() != 0)
@@ -110,11 +101,18 @@ public class TomatoBuilderActivity extends Activity {
             ArrayList<DataMap> arrayMap = dataMap.getDataMapArrayList(WatchFaceUtil.KEY_TOMATO_TAG_LIST);
             for (DataMap map:arrayMap)
             {
-                if (map.containsKey(WatchFaceUtil.KEY_TOMATO_TAG_NAME))
-                    tag_list.add(map.getString(WatchFaceUtil.KEY_TOMATO_TAG_NAME,""));
+                if (map.containsKey(WatchFaceUtil.KEY_TOMATO_TAG_NAME)) {
+                    tag_list.add(map.getString(WatchFaceUtil.KEY_TOMATO_TAG_NAME, ""));
+                    isSetTag = true;
+                }
             }
-
         }
+        if (!isSetTag)
+        {
+            for (String tag:WatchFaceUtil.DEFAULT_TOMATO_TAGS)
+                tag_list.add(tag);
+        }
+
         ArrayAdapter<String> adapter = null;
         adapter = new ArrayAdapter<>(this,R.layout.list_item_tomato_builder, tag_list);
 

@@ -6,7 +6,6 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,24 +13,21 @@ import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.CalendarContract;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -61,8 +57,14 @@ public class MainMobileTimerActivity extends Activity {
     private TextView mTextSec;
     private TextView mTextCenter;
 
+    private boolean mIsForceScrAlwaysOn;
+    private boolean mIsScrAlwaysOn;
+    private boolean mIsScrAlwaysOnCharging;
     private long mDataTomatoPowerUpdated;
-    private ImageView mImagePower;
+    private ImageView mImageScrAlwaysOnPower;
+    private ImageView mImageScrAlwaysOnSun;
+    private ImageView mImageScrAlwaysOnLock;
+    private LinearLayout mLayoutScrAlwaysOn;
     //private TextView mTextMinAndSec;
 
     ProgressBar mProgressBar;
@@ -108,8 +110,29 @@ public class MainMobileTimerActivity extends Activity {
 
         mTextCenter = findViewById(R.id.textview_center_2);
 
+        mIsScrAlwaysOn = false;
+        mIsForceScrAlwaysOn = false;
+        mIsScrAlwaysOnCharging = false;
         mDataTomatoPowerUpdated = System.currentTimeMillis();
-        mImagePower = findViewById(R.id.image_power);
+        mImageScrAlwaysOnPower = findViewById(R.id.image_power);
+        mImageScrAlwaysOnSun = findViewById(R.id.image_scr_always_on);
+        mImageScrAlwaysOnLock = findViewById(R.id.image_scr_always_on_lock);
+        mLayoutScrAlwaysOn = findViewById(R.id.layout_scr_always_on);
+        mLayoutScrAlwaysOn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIsForceScrAlwaysOn = !mIsForceScrAlwaysOn;
+                updatePowerStatus();
+                updateScrAlwaysOnStateStatus();
+
+                final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainMobileTimerActivity.this);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(WatchFaceUtil.KEY_TOMATO_SCR_ALWAYS_ON, mIsForceScrAlwaysOn);
+                editor.commit();
+            }
+        });
+
+
 
         mProgressBar = findViewById(R.id.circularProgressBar);
         mProgressBar.setProgress(0);
@@ -127,6 +150,23 @@ public class MainMobileTimerActivity extends Activity {
 //            shape.setColor(Color.Black); // changing to black color
 //        }
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View view = findViewById(android.R.id.content);
+//            int flags = view.getSystemUiVisibility();
+//            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+//            view.setSystemUiVisibility(flags);
+//            this.getWindow().setStatusBarColor(Color.WHITE);
+            int flags = view.getSystemUiVisibility();
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            view.setSystemUiVisibility(flags);
+            this.getWindow().setStatusBarColor(0xFF000000);
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow(); // in Activity's onCreate() for instance
+            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+            w.setStatusBarColor(0xFF000000);
+        }
 
     }
 
@@ -158,7 +198,6 @@ public class MainMobileTimerActivity extends Activity {
                 mTextCenter.setAlpha(0.5f);
             else
                 mTextCenter.setAlpha(1.0f);
-
         }
         else
         {
@@ -178,15 +217,15 @@ public class MainMobileTimerActivity extends Activity {
             }
             else
             {
-                long diffTime = mDataTomatoDateEnd - timeInMillis;
-                if (diffTime < 1000)
-                    progressCur = 0;
-                else {
-                    long totalTime = mDataTomatoDateEnd - mDataTomatoDateStart;
-                    if (totalTime < 0)
-                        totalTime = 1000;
-                    progressCur = (int) ((diffTime * 100) / (totalTime));
-                }
+                long diffTime = (mDataTomatoDateEnd - timeInMillis)/1000;
+//                if (diffTime < 1000)
+//                    progressCur = 0;
+//                else {
+//                    long totalTime = mDataTomatoDateEnd - mDataTomatoDateStart;
+//                    progressCur = (int) ((diffTime * 100) / (totalTime));
+//                }
+                long totalTime = (mDataTomatoDateEnd - mDataTomatoDateStart)/1000;
+                progressCur = (int) ((diffTime * 100) / (totalTime));
             }
 
             if (progressCur>100) progressCur = 100;
@@ -275,17 +314,42 @@ public class MainMobileTimerActivity extends Activity {
 
     private void updatePowerStatus()
     {
-        boolean isScreenOn = isPowerConnected(this);
-        Log.d(TAG,"isPowerConnected " + isScreenOn);
-        if (isScreenOn) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            mImagePower.setVisibility(View.VISIBLE);
-        }
-        else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            mImagePower.setVisibility(View.INVISIBLE);
-        }
+        boolean isScrAlwaysOnChargingPre = mIsScrAlwaysOnCharging;
+        mIsScrAlwaysOnCharging = isPowerConnected(this);
+        Log.d(TAG,"isPowerConnected " + mIsScrAlwaysOnCharging);
+//        if (isScreenOn) {
+//            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//            //mImageScrAlwaysOnPower.setVisibility(View.VISIBLE);
+//        }
+//        else {
+//            mIsScrAlwaysOnCharging
+//            //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//            //mImageScrAlwaysOnPower.setVisibility(View.INVISIBLE);
+//        }
         mDataTomatoPowerUpdated = System.currentTimeMillis();
+        if (isScrAlwaysOnChargingPre != mIsScrAlwaysOnCharging)
+            updateScrAlwaysOnStateStatus();
+    }
+
+    private void updateScrAlwaysOnStateStatus()
+    {
+        mImageScrAlwaysOnPower.setVisibility(mIsScrAlwaysOnCharging?View.VISIBLE:View.GONE);
+        mImageScrAlwaysOnLock.setVisibility(mIsForceScrAlwaysOn?View.VISIBLE:View.GONE);
+
+        if (mIsScrAlwaysOnCharging || mIsForceScrAlwaysOn)
+        {
+            if (!mIsScrAlwaysOn)
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            mImageScrAlwaysOnSun.setAlpha(0.6f);
+            mIsScrAlwaysOn = true;
+        }
+        else
+        {
+            if (mIsScrAlwaysOn)
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            mImageScrAlwaysOnSun.setAlpha(0.2f);
+            mIsScrAlwaysOn = false;
+        }
     }
 
     private void changeProgressBarMode(ProgressMode mode)
@@ -295,16 +359,20 @@ public class MainMobileTimerActivity extends Activity {
         {
             case ERROR:
                 new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar_red, null);
+                mTextCalPrefix.setTextColor(0xFFF44336);
                 break;
             case WARNING:
                 new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar_yellow, null);
+                mTextCalPrefix.setTextColor(0xFFFFEB3B);
                 break;
             case IDLE:
                 new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar_idle, null);
+                mTextCalPrefix.setTextColor(0xFFFFFFFF);
                 break;
             case NORMAL:
             default:
                 new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar, null);
+                mTextCalPrefix.setTextColor(mSelectedCalendarColor);
         }
         if (new_drawable != null)
         {
@@ -525,6 +593,7 @@ public class MainMobileTimerActivity extends Activity {
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
+
         mActivityShowed = true;
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mSelectedCalendarName = prefs.getString(WatchFaceUtil.KEY_TOMATO_CALENDAR_NAME,"");
@@ -538,6 +607,9 @@ public class MainMobileTimerActivity extends Activity {
 
         mDataTomatoDateStart = prefs.getLong(WatchFaceUtil.KEY_TOMATO_DATE_START, mDataTomatoDateStart);
         mDataTomatoDateEnd = prefs.getLong(WatchFaceUtil.KEY_TOMATO_DATE_END, mDataTomatoDateEnd);
+
+        mIsForceScrAlwaysOn = prefs.getBoolean(WatchFaceUtil.KEY_TOMATO_SCR_ALWAYS_ON,mIsForceScrAlwaysOn);
+        updateScrAlwaysOnStateStatus();
 
         mTomatoType = prefs.getString(WatchFaceUtil.KEY_TOMATO_TYPE,mTomatoType);
 
@@ -569,7 +641,6 @@ public class MainMobileTimerActivity extends Activity {
 
         if (mSelectedCalendarID != -1 && mSelectedCalendarName.length()!=0) {
             mTextCal.setText(mSelectedCalendarName);
-            mTextCalPrefix.setTextColor(mSelectedCalendarColor);
         }
         else
         {
@@ -605,6 +676,8 @@ public class MainMobileTimerActivity extends Activity {
         Log.d(TAG,"onPause");
         super.onPause();
         mActivityShowed = false;
+        mIsScrAlwaysOn = false;
+        mIsScrAlwaysOnCharging = false;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
     @Override

@@ -8,7 +8,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -125,6 +127,8 @@ public class MainConfigActivity extends PreferenceActivity implements
     private GoogleApiClient mGoogleApiClient;
     private String mPeerId;
 
+    private final int mDefaultMinSec = 10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,6 +151,14 @@ public class MainConfigActivity extends PreferenceActivity implements
         mPrefTimer3 = findPreference("pref_key_timer3");
         mPrefTimer4 = findPreference("pref_key_timer4");
 
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View view = findViewById(android.R.id.content);
+            int flags = view.getSystemUiVisibility();
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            view.setSystemUiVisibility(flags);
+            this.getWindow().setStatusBarColor(Color.WHITE);
+        }
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mDataTomatoWork = prefs.getInt(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
@@ -209,7 +221,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 pickerHour.clearFocus();
                                 pickerMin.clearFocus();
                                 mDataTomatoWork = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
-                                if (mDataTomatoWork == 0) mDataTomatoWork = 1;
+                                if (mDataTomatoWork == 0) mDataTomatoWork = mDefaultMinSec;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoWork);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_WORK, mDataTomatoWork);
                                 mPrefPomodoroTimerWork.setSummary("" + mDataTomatoWork / 60 + " min");
@@ -234,7 +246,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 pickerHour.clearFocus();
                                 pickerMin.clearFocus();
                                 mDataTomatoRelax = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
-                                if (mDataTomatoRelax == 0) mDataTomatoRelax = 10;
+                                if (mDataTomatoRelax == 0) mDataTomatoRelax = mDefaultMinSec;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelax);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
                                 mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax / 60 + " min");
@@ -259,7 +271,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 pickerHour.clearFocus();
                                 pickerMin.clearFocus();
                                 mDataTomatoRelaxLong = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
-                                if (mDataTomatoRelaxLong == 0) mDataTomatoRelaxLong = 1;
+                                if (mDataTomatoRelaxLong == 0) mDataTomatoRelaxLong = mDefaultMinSec;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelaxLong);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_RELAX_LONG, mDataTomatoRelaxLong);
                                 mPrefPomodoroTimerLongRelex.setSummary("" + mDataTomatoRelaxLong / 60 + " min");
