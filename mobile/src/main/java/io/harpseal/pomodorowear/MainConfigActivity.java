@@ -206,7 +206,6 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
-
                                 pickerHour.clearFocus();
                                 pickerMin.clearFocus();
                                 mDataTomatoWork = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
@@ -232,6 +231,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTomatoRelax = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 if (mDataTomatoRelax == 0) mDataTomatoRelax = 10;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelax);
@@ -255,6 +256,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTomatoRelaxLong = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 if (mDataTomatoRelaxLong == 0) mDataTomatoRelaxLong = 1;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelaxLong);
@@ -289,6 +292,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                         Dialog dialog  = (Dialog) dialogInterface;
                         NumberPicker pickerHour = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_hour);
                         NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
+                        pickerHour.clearFocus();
+                        pickerMin.clearFocus();
                         mDataTimer1 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                         Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer1);
                         sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER1,mDataTimer1);
@@ -311,6 +316,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog  = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker)dialog.findViewById(R.id.dialog_number_picker_min);
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTimer2 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer2);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER2,mDataTimer2);
@@ -333,6 +340,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTimer3 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer3);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER3, mDataTimer3);
@@ -355,6 +364,8 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTimer4 = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTimer4);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TIMER4, mDataTimer4);
