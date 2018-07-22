@@ -43,7 +43,7 @@ public class MainMobileTimerActivity extends Activity {
     final String TAG = MainMobileTimerActivity.class.getName();
     enum ProgressMode
     {
-        NORMAL,WARNING,ERROR
+        NORMAL,WARNING,ERROR,IDLE
     }
 
 
@@ -148,8 +148,10 @@ public class MainMobileTimerActivity extends Activity {
             strMin = sdfhour.format(dateNow);
             strSec = sdfmin.format(dateNow);
 
-            changeProgressBarMode(ProgressMode.NORMAL);
-            progressCur = (Calendar.getInstance().get(Calendar.SECOND)*100)/60;
+            changeProgressBarMode(ProgressMode.IDLE);
+            progressCur = (Calendar.getInstance().get(Calendar.SECOND)*100)/59;
+            if (progressCur >=100)
+                progressCur = 100;
 
             long timeInSec = timeInMillis/1000;
             if ((timeInSec & 1) != 0)
@@ -176,9 +178,18 @@ public class MainMobileTimerActivity extends Activity {
             }
             else
             {
-                progressCur = (int)(((mDataTomatoDateEnd - timeInMillis) * 100) / (mDataTomatoDateEnd - mDataTomatoDateStart));
+                long diffTime = mDataTomatoDateEnd - timeInMillis;
+                if (diffTime < 1000)
+                    progressCur = 0;
+                else {
+                    long totalTime = mDataTomatoDateEnd - mDataTomatoDateStart;
+                    if (totalTime < 0)
+                        totalTime = 1000;
+                    progressCur = (int) ((diffTime * 100) / (totalTime));
+                }
             }
 
+            if (progressCur>100) progressCur = 100;
             if (time_sec<0) time_sec = -time_sec;
 
             time_min = time_sec / 60;
@@ -224,9 +235,11 @@ public class MainMobileTimerActivity extends Activity {
             updatePowerStatus();
         Log.d(TAG,"updateTimer " + (progressPre/100) + " -> " + progressCur + " " + (timeInMillis - mDataTomatoPowerUpdated));
 
+        int progressDiff = Math.abs((progressPre/100) - progressCur);
+
         if (isUpdateProgressBar && progressCur != (progressPre/100))
         {
-            if (enableProgressBarAnimation)
+            if (progressDiff < 98 && enableProgressBarAnimation)
             {
                 ObjectAnimator animation = ObjectAnimator.ofInt (mProgressBar, "progress", progressPre, progressCur*100); // see this max value coming back here, we animale towards that value
                 animation.setDuration (800); //in milliseconds
@@ -234,7 +247,7 @@ public class MainMobileTimerActivity extends Activity {
                 animation.start ();
             }
             else
-                mProgressBar.setProgress(progressCur);
+                mProgressBar.setProgress(progressCur*100);
         }
 
         mDataTomatoTimeInMillisPre = timeInMillis;
@@ -285,6 +298,9 @@ public class MainMobileTimerActivity extends Activity {
                 break;
             case WARNING:
                 new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar_yellow, null);
+                break;
+            case IDLE:
+                new_drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.progressbar_idle, null);
                 break;
             case NORMAL:
             default:
@@ -360,7 +376,7 @@ public class MainMobileTimerActivity extends Activity {
                 mBtnStop.setVisibility(View.GONE);
                 mBtnPrevious.setVisibility(View.GONE);
                 mBtnNext.setVisibility(View.GONE);
-                changeProgressBarMode(ProgressMode.NORMAL);
+                changeProgressBarMode(ProgressMode.IDLE);
 
             }
             else if (v == mBtnPlay && (mDataTomatoDateStart == 0 || mDataTomatoDateEnd == 0 || mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)))
@@ -525,8 +541,10 @@ public class MainMobileTimerActivity extends Activity {
 
         mTomatoType = prefs.getString(WatchFaceUtil.KEY_TOMATO_TYPE,mTomatoType);
 
-        if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK) || mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE))
+        if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_WORK))
             changeProgressBarMode(ProgressMode.NORMAL);
+        else if (mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE))
+            changeProgressBarMode(ProgressMode.IDLE);
         else // relax , long relax
             changeProgressBarMode(ProgressMode.WARNING);
 

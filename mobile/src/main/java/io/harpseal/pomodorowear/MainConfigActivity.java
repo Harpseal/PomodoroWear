@@ -206,6 +206,9 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 Dialog dialog = (Dialog) dialogInterface;
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
+
+                                pickerHour.clearFocus();
+                                pickerMin.clearFocus();
                                 mDataTomatoWork = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
                                 if (mDataTomatoWork == 0) mDataTomatoWork = 1;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoWork);
@@ -230,7 +233,7 @@ public class MainConfigActivity extends PreferenceActivity implements
                                 NumberPicker pickerHour = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_hour);
                                 NumberPicker pickerMin = (NumberPicker) dialog.findViewById(R.id.dialog_number_picker_min);
                                 mDataTomatoRelax = (pickerHour.getValue() * 60 + pickerMin.getValue()) * 60;
-                                if (mDataTomatoRelax == 0) mDataTomatoRelax = 1;
+                                if (mDataTomatoRelax == 0) mDataTomatoRelax = 10;
                                 Log.v(TAG, "MinRes : " + pickerHour.getValue() + " : " + pickerMin.getValue() + " = " + mDataTomatoRelax);
                                 sendConfigUpdateMessageInt(WatchFaceUtil.KEY_TOMATO_RELAX, mDataTomatoRelax);
                                 mPrefPomodoroTimerRelax.setSummary("" + mDataTomatoRelax / 60 + " min");
