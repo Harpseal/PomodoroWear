@@ -338,7 +338,6 @@ public class MainMobileTimerActivity extends Activity {
             boolean isModifiedConfig = false;
 
 
-
             long dtstart,dtend;
             dtstart = 0;
             dtend = 0;
@@ -363,17 +362,6 @@ public class MainMobileTimerActivity extends Activity {
                 mBtnNext.setVisibility(View.GONE);
                 changeProgressBarMode(ProgressMode.NORMAL);
 
-                Intent updateServiceIntent = new Intent(this, AlarmReceiver.class);
-                PendingIntent pendingUpdateIntent = PendingIntent.getService(this, 0, updateServiceIntent, 0);
-
-                // Cancel alarms
-                try {
-                    mAlarmManager.cancel(pendingUpdateIntent);
-                    Log.d(TAG, "AlarmManager update was canceled. ");
-                } catch (Exception e) {
-                    Log.e(TAG, "AlarmManager update was not canceled. " + e.toString());
-                }
-                mNotificationManager.cancelAll();
             }
             else if (v == mBtnPlay && (mDataTomatoDateStart == 0 || mDataTomatoDateEnd == 0 || mTomatoType.equals(WatchFaceUtil.KEY_TOMATO_IDLE)))
             {
@@ -463,6 +451,22 @@ public class MainMobileTimerActivity extends Activity {
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, mDataTomatoDateEnd, pi);
 
                     updateNotification();
+                }
+                else
+                {
+                    Intent updateServiceIntent = new Intent(this, AlarmReceiver.class);
+                    //PendingIntent pendingUpdateIntent = PendingIntent.getService(this, 0, updateServiceIntent, 0);
+                    PendingIntent pendingUpdateIntent = PendingIntent.getBroadcast(this, 1, updateServiceIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+
+                    // Cancel alarms
+                    try {
+                        mAlarmManager.cancel(pendingUpdateIntent);
+                        Log.d(TAG, "AlarmManager update was canceled. ");
+                    } catch (Exception e) {
+                        Log.e(TAG, "AlarmManager update was not canceled. " + e.toString());
+                    }
+                    mNotificationManager.cancelAll();
                 }
 
 
@@ -631,6 +635,12 @@ public class MainMobileTimerActivity extends Activity {
                     getResources().getString(R.string.text_builder_time_end) + " @ " + timeTxtFormat.format(new Date(mDataTomatoDateEnd));
         }
 
+
+        updateNotification(noTitle,noText,iconID,false,false);
+    }
+
+    private void updateNotification(String title, String text, int iconID, boolean isVirbrate, boolean isSound)
+    {
         Intent timerIntent = new Intent(this, io.harpseal.pomodorowear.MainMobileTimerActivity.class);
         timerIntent.setAction(Intent.ACTION_MAIN);
         timerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -643,24 +653,31 @@ public class MainMobileTimerActivity extends Activity {
 //        contentView.setTextViewText(R.id.title, noTitle);
 //        contentView.setTextViewText(R.id.text, noText);
 
-        Notification notification = new Notification.Builder(this)
+        Notification.Builder notificationBuilder = new Notification.Builder(this)
                 //.setPriority(NotificationManager.IMPORTANCE_HIGH)
                 //.setCustomContentView(contentView)
                 .setContentIntent(pendingIntent)
-                .setContentTitle(noTitle)
-                .setContentText(noText)
+                .setContentTitle(title)
+                .setContentText(text)
                 .setSmallIcon(iconID)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),iconID))
-                .setDefaults(Notification.DEFAULT_SOUND)
-                .setVibrate(new long[]{0L}) // Passing null here silently fails
-                .setPriority(Notification.PRIORITY_HIGH)
-                .build();
+
+                .setPriority(Notification.PRIORITY_HIGH);
+
+        int settings = Notification.DEFAULT_LIGHTS;
+        if (isVirbrate)
+            settings |= Notification.DEFAULT_VIBRATE;
+        else
+            notificationBuilder.setVibrate(new long[]{0L}); // Passing null here silently fails
+        if (isSound)
+            settings |= Notification.DEFAULT_SOUND;
+        notificationBuilder.setDefaults(settings);
+
 
         mNotificationManager.cancel(WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID, 0);
         mNotificationManager.notify(
                 WatchFaceUtil.ID_TOMATO_NOTIFICATION_ID, 1,  // <-- Place your notification id here
-                notification);
-
+                notificationBuilder.build());
     }
 
     private void updateModeText(String prefix, String postfix){
